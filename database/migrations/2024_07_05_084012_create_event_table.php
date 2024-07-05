@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('comments', function (Blueprint $table) {
-            $table->id(); // IDカラムを追加
+        Schema::create('events', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('blog_id')->constrained('blogs')->onDelete('cascade');
-            $table->string('comment', 300); // コメント文
-            $table->integer('good')->default(0); // いいね数
+            $table->string('title',35);//イベント名称etc.
+            $table->string('body',300);//投稿文
+            $table->string('photo')->nullable();//s3の保存先ファイルパス
+            $table->integer('good')->default(0);//いいね数
+            $table->string('address');//実施未定
             $table->timestamps();
             $table->softDeletes();
-        }); 
+        });
     }
 
     /**
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('comments');
+        Schema::dropIfExists('event');
     }
 };

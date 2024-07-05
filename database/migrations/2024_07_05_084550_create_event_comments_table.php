@@ -11,9 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event_comments', function (Blueprint $table) {
-            $table->id();
+        Schema::create('event_comment', function (Blueprint $table) {
+            $table->id(); // IDカラムを追加
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
+            $table->string('comment', 300); // コメント文
+            $table->integer('good')->default(0); // いいね数
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -22,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('event_comments');
+        Schema::dropIfExists('event_comment');
     }
 };
