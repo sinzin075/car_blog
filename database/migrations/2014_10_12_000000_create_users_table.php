@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('photo')->nullable(); // アイコン・保存先S3のファイルパス
+            $table->foreignId('car1_id')->nullable()->constrained('cars')->nullOnDelete(); // 3台まで登録可能
+            $table->foreignId('car2_id')->nullable()->constrained('cars')->nullOnDelete();
+            $table->foreignId('car3_id')->nullable()->constrained('cars')->nullOnDelete();
+            $table->string('greeting', 300); // 挨拶
             $table->rememberToken();
             $table->timestamps();
         });

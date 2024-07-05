@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('blogs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('body',300);//投稿文
+            $table->string('photo')->nullable();//s3の保存先ファイルパス
+            $table->integer('good')->default(0);//いいね数
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
