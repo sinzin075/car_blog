@@ -17,7 +17,7 @@ class BlogController extends Controller
 {
     public function index(User $user,Blog $blog,BlogComment $blog_comment){//定義ほぼ完了
         $users = $user -> get();
-        $blogs = $blog -> with(['user','blogComments'])->where('user_id',$userId)->orderBy('create_at','desc') -> get();
+        $blogs = $blog -> with(['user','blogComments'])->orderBy('created_at','desc') -> get();
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         foreach($blogs as $single_blog){
             $comment_count[$single_blog->id] = $single_blog  -> blogComments -> count();
@@ -33,7 +33,7 @@ class BlogController extends Controller
     public function event(User $user,Event $event,EventComment $event_comment){//定義未完了
         $users = $user -> get();
         $events = $event -> get();
-        $event_comments = $event_comment -> get();
+        $event_comments = $eventc_comment -> get();
         
         return view('blog.event') -> with([
             'users' => $users,
