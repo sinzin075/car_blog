@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [BlogController::class,'index'])->name('index');//初期画面
+Route::get('/post',[BlogController::class,'post'])->name('post');//新しい投稿画面view側から遷移
 
 Route::get('/dashboard', function () {
     return view('dashboard');

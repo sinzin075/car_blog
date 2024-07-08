@@ -29,6 +29,10 @@ class BlogController extends Controller
             'comment_count' => $comment_count,
             ]);
     }
+    public function post(){
+        $data = User::all();
+        return view('post',compact('data'));
+    }
     
     public function event(User $user,Event $event,EventComment $event_comment){//定義未完了
         $users = $user -> get();
