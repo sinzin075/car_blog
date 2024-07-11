@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [BlogController::class,'index'])->name('index');//初期画面
-Route::get('/post',[BlogController::class,'post'])->name('post');//新しい投稿画面view側から遷移
+Route::get('/', [BlogController::class,'index'])->name('index')->middleware('auth');//初期画面
+
+Route::get('/post/create',[BlogController::class,'post'])->name('post');//新しい投稿画面view側から遷移
+Route::post('/post',[BlogController::class,'upload'])->name('upload');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

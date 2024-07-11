@@ -10,12 +10,14 @@ use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\Car;
 use App\Models\Follow;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Auth;
 
 
 
 class BlogController extends Controller
 {
-    public function index(User $user,Blog $blog,BlogComment $blog_comment){//定義ほぼ完了
+    public function index(User $user,Blog $blog,BlogComment $blog_comment){//index画面設定
         $users = $user -> get();
         $blogs = $blog -> with(['user','blogComments'])->orderBy('created_at','desc') -> get();
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
@@ -29,10 +31,32 @@ class BlogController extends Controller
             'comment_count' => $comment_count,
             ]);
     }
-    public function post(){
-        $data = User::all();
-        return view('post',compact('data'));
+    
+    public function post(User $user){//postnのviewを表示
+        $user -> get();
+        return view('blog.post')->with('user',$user);
     }
+
+    public function upload(Request $request){//postから送信されたフォームの保存
+        // バリデーション
+        $this->validate($request, [
+            'body' => 'required|string|max:300',
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+        ]);
+
+        // 画像のアップロード
+        $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
+
+        // データベースに保存
+        $blog = new Blog;
+        $blog->user_id = Auth::id(); // ログインユーザーのIDを設定
+        $blog->body = $request->body;
+        $blog->photo = $uploadedFileUrl;
+        $blog->save();
+        
+        return redirect()->route('index')->with('success', 'Blog post created successfully!');
+    }
+
     
     public function event(User $user,Event $event,EventComment $event_comment){//定義未完了
         $users = $user -> get();
