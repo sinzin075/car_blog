@@ -2,13 +2,6 @@
     <x-slot name="header">
         Car Blog
     </x-slot>
-    <div class="menu">
-        <ul>
-            <li><a href="">Blog</a></li><!--blog画面へ遷移-->
-            <li><a href="">Event</a></li><!--event画面へ遷移-->
-            <li><a href="">Users</a></li><!--userstatus画面へ遷移-->
-        </ul>
-    </div>
     <div class="post"><!--投稿画面へ遷移-->
         <a href="{{ route('post') }}">new post</a>
     </div>
@@ -26,9 +19,15 @@
                     <!--ここまで完了-->
                     <div class="good">{{$blog->good}}</div><!--いいね数-->
                 </span>
-                @foreach($blog_comments as $comment)
-                    <p>{{ $blogs->comment }}</p>
-                @endforeach
+                    @if (isset($blog_comments[$blog->id]) && count($blog_comments[$blog->id]) > 0)
+                        <div class="comment_count">{{ count($blog_comments[$blog->id]) }}</div><!--コメント数-->
+                        @foreach ($blog_comments[$blog->id] as $comment)
+                            <!--コメント内容を表示-->
+                            <div class="comment">{{ $comment->content }}</div>
+                        @endforeach
+                    @else
+                        <div class="no_comments"></div>
+                    @endif
                     
             </a>
         </div>

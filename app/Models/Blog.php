@@ -9,11 +9,16 @@ class Blog extends Model
 {
     use HasFactory;
     
+    protected $fillable = [
+        'body',
+        'photo',
+    ];
+    
     public function User(){
-        return $this->belongsto(User::class);
+        return $this->belongsTo(User::class);
     }
     
-    public function BlogComment(){
+    public function Blogcomments(){
         return $this->hasMany(BlogComment::class);
     }
 }
