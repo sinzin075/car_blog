@@ -23,6 +23,7 @@ class BlogController extends Controller
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         foreach($blogs as $single_blog){
             $comment_count[$single_blog->id] = $single_blog  -> blogComments -> count();
+
         }
         
         return view('blog.index') -> with([

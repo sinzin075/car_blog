@@ -14,6 +14,7 @@
                     <span>{{$blog -> user -> name}}</span>
                 </div>
                 <p class="body">{{$blog -> body}}</p><!--blog本文-->
+                <p><img src="{{$blog -> photo}}"></p>
                 <span>
                     <div class="comment_count">{{$comment_count[$blog -> id]}}</div><!--コメント数-->
                     <!--ここまで完了-->
