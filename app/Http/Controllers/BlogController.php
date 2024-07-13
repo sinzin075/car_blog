@@ -23,13 +23,22 @@ class BlogController extends Controller
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         foreach($blogs as $single_blog){
             $comment_count[$single_blog->id] = $single_blog  -> blogComments -> count();
-
         }
-        
         return view('blog.index') -> with([
             'users' => $users,
             'blogs' => $blogs,
             'comment_count' => $comment_count,
+            ]);
+    }
+    
+    public function show($id){
+        $blog = Blog::with('blogComments')->findOrFail($id);
+        $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
+        $comment_count[$blog->id] = $blog -> blogComments -> count();
+        
+        return view('blog.show')->with([
+            'blog' => $blog,
+            'comment_count' => $comment_count
             ]);
     }
     

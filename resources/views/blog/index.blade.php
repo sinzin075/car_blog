@@ -3,12 +3,12 @@
         Car Blog
     </x-slot>
     <div class="post"><!--投稿画面へ遷移-->
-        <a href="{{ route('post') }}">new post</a>
+        <a href="{{ route('post')}}">new post</a>
     </div>
 
     @foreach ($blogs as $blog)
         <div class="post"><!--投稿内容-->
-            <a href=""><!--投稿詳細へ遷移-->
+            <a href={{route('show',['blog' => $blog->id])}}><!--投稿詳細へ遷移-->
                 <div class="user"><!--ユーザー名&アイコン-->
                     <img src="" alt="user_icon">
                     <span>{{$blog -> user -> name}}</span>
