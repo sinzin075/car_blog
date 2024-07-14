@@ -40,33 +40,20 @@ class BlogController extends Controller
             ]);
     }
     
-    public function good(Request $request)
-{
-    $user = Auth::id(); //ユーザーIDを取得
-    $blog = $request->input('blog');
 
-    $like = Likes::where('user_id', $user)->where('blog_id', $blog)->first();
-
-    if ($like) {// いいねがすでに存在する場合、削除する
-        $like->delete();
-    } else {// いいねが存在しない場合、作成する
-        Likes::create([
-            'user_id' => $user,
-            'blog_id' => $blog,
-        ]);
-    }
-    return redirect()->back();
-}
 
     
     public function show($id){//投稿内容の詳細ページ
-        $blog = Blog::with(['user','blogComments'])->findOrFail($id);
+        $blog = Blog::with(['user','blogComments','likes'])->findOrFail($id);
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         $comment_count[$blog->id] = $blog -> blogComments -> count();
+        $like_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
+        $like_count[$blog->id] = $blog -> likes -> count();
         
         return view('blog.show')->with([
             'blog' => $blog,
-            'comment_count' => $comment_count
+            'comment_count' => $comment_count,
+            'like_count' => $like_count
             ]);
     }
     
@@ -152,4 +139,22 @@ class BlogController extends Controller
             'cars' => $cars,
             ]);
     }
+
+    public function good(Request $request){//いいね機能
+        $user = Auth::id(); //ユーザーIDを取得
+        $blog = $request->input('blog');
+    
+        $like = Likes::where('user_id', $user)->where('blog_id', $blog)->first();
+    
+        if ($like) {// いいねがすでに存在する場合、削除する
+            $like->delete();
+        } else {// いいねが存在しない場合、作成する
+            Likes::create([
+                'user_id' => $user,
+                'blog_id' => $blog,
+            ]);
+        }
+        return redirect()->back();
+    }
 }
+
