@@ -31,7 +31,7 @@ class BlogController extends Controller
             ]);
     }
     
-    public function show($id){
+    public function show($id){//投稿内容の詳細ページ
         $blog = Blog::with('blogComments')->findOrFail($id);
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         $comment_count[$blog->id] = $blog -> blogComments -> count();
@@ -42,7 +42,8 @@ class BlogController extends Controller
             ]);
     }
     
-    public function post(User $user){//postnのviewを表示
+    //保存の際の画像サイズ要検討
+    public function post(User $user){//新しい投稿ページ用
         $user -> get();
         return view('blog.post')->with('user',$user);
     }
@@ -53,10 +54,8 @@ class BlogController extends Controller
             'body' => 'required|string|max:300',
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
-
         // 画像のアップロード
         $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
-
         // データベースに保存
         $blog = new Blog;
         $blog->user_id = Auth::id(); // ログインユーザーのIDを設定
@@ -66,8 +65,30 @@ class BlogController extends Controller
         
         return redirect()->route('index')->with('success', 'Blog post created successfully!');
     }
-
+    public function comment($id){//投稿に対するコメント
+        $blog = Blog::with('user') -> findOrFail($id);
+        $commentUser = Auth::user();
+        
+        
+        return view('blog.comment')->with([
+            'blog' => $blog,
+            'commentUser'=>$commentUser
+            ]);
+    }
     
+    public function commentUpload(Request $request){//postから送信されたフォームの保存
+        // バリデーション
+        $this->validate($request, [
+            'body' => 'required|string|max:300'
+        ]);
+        // データベースに保存
+        $blog_comment = new BlogComment;
+        $blog_comment -> user_id = Auth::id(); // ログインユーザーのIDを設定
+        $blog_comment -> blog_id = $request -> blog_id();
+        $blog_comment -> comment = $request->comment;
+        $blog_comment -> save();
+    }
+
     public function event(User $user,Event $event,EventComment $event_comment){//定義未完了
         $users = $user -> get();
         $events = $event -> get();

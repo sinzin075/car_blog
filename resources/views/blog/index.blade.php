@@ -20,6 +20,7 @@
                     <!--ここまで完了-->
                     <div class="good">{{$blog->good}}</div><!--いいね数-->
                 </span>
+                <a href = {{route('comment',['blog' => $blog->id])}}>comment</a><!--コメント画面へ遷移-->
                     @if (isset($blog_comments[$blog->id]) && count($blog_comments[$blog->id]) > 0)
                         <div class="comment_count">{{ count($blog_comments[$blog->id]) }}</div><!--コメント数-->
                         @foreach ($blog_comments[$blog->id] as $comment)
