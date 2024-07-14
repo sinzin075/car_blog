@@ -17,13 +17,19 @@
                 <p><img src="{{$blog->photo}}"></p>
                 <span>
                     <div class="comment_count">{{$comment_count[$blog->id]}}</div><!--コメント数-->
-                    <div class="good">{{$blog->good}}</div><!--いいね数-->
+                    <div class="good">{{$like_count[$blog->id]}}</div><!--いいね数-->
                 </span>
                 
                 
                 <a href = {{route('comment',['blog'=>$blog->id])}}>comment</a><!--コメント画面へ遷移-->
+                
+                <form action="{{route('good',['blog' => $blog ->id])}}" method="POST" enctype="multipart/form-data"><!--いいねボタン-->
+                    @csrf
+                    <input type="submit" value="いいね"><!--ボタンの生成-->
+                 </form>
+                       
+                                
                 @if (isset($blog ->blogComments) && count($blog->blogComments) > 0)
-                    <div class="comment_count">{{ count($blog->blogComments) }}</div><!--コメント数-->
                     @foreach ($blog->blogComments as $comment)
                         <div class="user"><!--コメントユーザー名&アイコン-->
                             <img src="" alt="user_icon">
