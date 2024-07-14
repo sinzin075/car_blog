@@ -12,4 +12,8 @@ class BlogComment extends Model
     public function Blog(){
         return $this->belongsTo(Blog::class);
     }
+    
+    public function User(){
+        return $this->belongsTo(User::class);
+    }
 }

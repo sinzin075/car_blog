@@ -50,7 +50,9 @@ class User extends Authenticatable
     public function Blog(){
         return $this -> hasMany(Blog::class);
     }
-    
+    public function BlogComment(){
+        return $this -> hasMany(BlogComment::class);
+    }
     public function Event(){
         return $this -> hasMany(Event::class);
     }
