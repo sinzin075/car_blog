@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="user"><!--ユーザー名&アイコン-->
-        <img src="" alt="user_icon">
+        <img src="/{$id}" alt="user_icon">
         <span>{{$user -> name}}</span>
     </div>
     <form action="{{route('upload')}}" method="POST" enctype="multipart/form-data">

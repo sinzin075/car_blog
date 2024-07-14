@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use App\Models\User;
 use App\Models\Blog;
 use App\Models\BlogComment;
@@ -65,10 +66,10 @@ class BlogController extends Controller
         
         return redirect()->route('index')->with('success', 'Blog post created successfully!');
     }
+    
     public function comment($id){//投稿に対するコメント
-        $blog = Blog::with('user') -> findOrFail($id);
-        $commentUser = Auth::user();
-        
+        $blog = Blog::with('user') -> findOrFail($id);//投稿と投稿ユーザー情報
+        $commentUser = Auth::user();//ログインユーザー(コメントする人)
         
         return view('blog.comment')->with([
             'blog' => $blog,
@@ -76,17 +77,20 @@ class BlogController extends Controller
             ]);
     }
     
-    public function commentUpload(Request $request){//postから送信されたフォームの保存
+    public function commentUpload(Request $request): RedirectResponse
+    {//postから送信されたフォームの保存
         // バリデーション
         $this->validate($request, [
-            'body' => 'required|string|max:300'
+            'comment' => 'required|string|max:300'
         ]);
         // データベースに保存
         $blog_comment = new BlogComment;
         $blog_comment -> user_id = Auth::id(); // ログインユーザーのIDを設定
-        $blog_comment -> blog_id = $request -> blog_id();
+        $blog_comment -> blog_id = $request -> blog;
         $blog_comment -> comment = $request->comment;
         $blog_comment -> save();
+        
+        return redirect()->route('index');
     }
 
     public function event(User $user,Event $event,EventComment $event_comment){//定義未完了
