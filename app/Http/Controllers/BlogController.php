@@ -40,22 +40,23 @@ class BlogController extends Controller
             ]);
     }
     
-
-
     
     public function show($id){//投稿内容の詳細ページ
         $blog = Blog::with(['user','blogComments','likes'])->findOrFail($id);
+        
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         $comment_count[$blog->id] = $blog -> blogComments -> count();
+        
         $like_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         $like_count[$blog->id] = $blog -> likes -> count();
         
         return view('blog.show')->with([
             'blog' => $blog,
             'comment_count' => $comment_count,
-            'like_count' => $like_count
+            'like_count' => $like_count,
             ]);
     }
+    
     
     //保存の際の画像サイズ要検討
     public function post(User $user){//新しい投稿ページ用
@@ -155,6 +156,19 @@ class BlogController extends Controller
             ]);
         }
         return redirect()->back();
+    }
+    
+    public function destroy($id)
+    {
+        $blog = Blog::findOrFail($id);
+    
+        // ログインユーザーが投稿者であるかをチェック
+        if (Auth::check() && Auth::user()->id == $blog->user_id) {
+            $blog->delete();
+            return redirect()->route('index')->with('success', '投稿を削除しました！');
+        } else {
+            return redirect()->route('index')->with('error', '削除権限がありません。');
+        }
     }
 }
 

@@ -20,6 +20,9 @@ Route::get('/post/create',[BlogController::class,'post'])->name('post');//新し
 Route::post('/post/create',[BlogController::class,'upload'])->name('upload');
 Route::post('/post/good', [BlogController::class, 'good'])->name('good')->middleware('auth');
 
+Route::delete('/blog/delete/{blog}', [BlogController::class, 'destroy'])->name('destroy');
+
+
 Route::get('/post/comment/{blog}',[BlogController::class,'comment'])->name('comment');//投稿に対するコメント画面
 Route::post('/post/comment/{blog}',[BlogController::class,'commentUpload'])->name('commentUpload');//コメント保存
 
