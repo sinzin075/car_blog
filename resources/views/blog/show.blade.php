@@ -10,14 +10,18 @@
         <!--ここまで完了-->
         <div class="good">{{$blog->good}}</div><!--いいね数-->
     </span>
-        @if (isset($blog_comments[$blog->id]) && count($blog_comments[$blosg->id]) > 0)
-            <div class="comment_count">{{ count($blog_comments[$blogs->id]) }}</div><!--コメント数-->
-            @foreach ($blog_comments[$blogs->id] as $comment)
-                <!--コメント内容を表示-->
-                <div class="comment">{{ $comment->content }}</div>
-            @endforeach
-        @else
-            <div class="no_comments"></div>
-        @endif
+    <a href = {{route('comment',['blog'=>$blog->id])}}>comment</a><!--コメント画面へ遷移-->
+       @if (isset($blog ->blogComments) && count($blog->blogComments) > 0)
+                    @foreach ($blog->blogComments as $comment)
+                        <div class="user"><!--コメントユーザー名&アイコン-->
+                            <img src="" alt="user_icon">
+                            <span>{{$comment->user->name}}</span>
+                            <p class="body">{{$comment->comment}}</p><!--blog本文-->
+                        </div>
+                        <div class="comment">{{ $comment->content }}</div>
+                    @endforeach
+                @else
+                    <div class="no_comments">コメントはまだありません</div>
+                @endif
 
 </x-app-layout>

@@ -11,6 +11,7 @@ use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\Car;
 use App\Models\Follow;
+use App\Models\Likes;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,10 +19,16 @@ use Illuminate\Support\Facades\Auth;
 
 class BlogController extends Controller
 {
-    public function index(User $user,Blog $blog,BlogComment $blog_comment){//index画面設定
+    public function index(User $user,Blog $blog,BlogComment $blog_comment,){//index画面設定
         $users = $user -> get();
-        $blogs = $blog -> with(['user','blogComments'])->orderBy('created_at','desc') -> get();
-        $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
+        $blogs = $blog -> with(['user','blogComments','likes'])->orderBy('created_at','desc') -> get();
+        
+        $like_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
+        foreach($blogs as $single_blog){
+            $like_count[$single_blog->id] = $single_blog  -> likes -> count();
+        }
+        
+        $comment_count = [];//blogsテーブルのidを使用して関連するいいねの数を返す
         foreach($blogs as $single_blog){
             $comment_count[$single_blog->id] = $single_blog  -> blogComments -> count();
         }
@@ -29,11 +36,31 @@ class BlogController extends Controller
             'users' => $users,
             'blogs' => $blogs,
             'comment_count' => $comment_count,
+            'like_count' => $like_count
             ]);
     }
     
+    public function good(Request $request)
+{
+    $user = Auth::id(); //ユーザーIDを取得
+    $blog = $request->input('blog');
+
+    $like = Likes::where('user_id', $user)->where('blog_id', $blog)->first();
+
+    if ($like) {// いいねがすでに存在する場合、削除する
+        $like->delete();
+    } else {// いいねが存在しない場合、作成する
+        Likes::create([
+            'user_id' => $user,
+            'blog_id' => $blog,
+        ]);
+    }
+    return redirect()->back();
+}
+
+    
     public function show($id){//投稿内容の詳細ページ
-        $blog = Blog::with('blogComments')->findOrFail($id);
+        $blog = Blog::with(['user','blogComments'])->findOrFail($id);
         $comment_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
         $comment_count[$blog->id] = $blog -> blogComments -> count();
         

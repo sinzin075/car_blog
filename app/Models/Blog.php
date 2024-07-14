@@ -21,4 +21,14 @@ class Blog extends Model
     public function Blogcomments(){
         return $this->hasMany(BlogComment::class);
     }
+    
+    public function likes()
+    {
+        return $this->hasMany(Likes::class);
+    }
+
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'likes');
+    }
 }
