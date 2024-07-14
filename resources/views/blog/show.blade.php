@@ -1,4 +1,15 @@
 <x-app-layout>
+    
+    <!-- 削除ボタンの表示 -->
+    @if (Auth::check() && Auth::user()->id == $blog->user_id)
+        <form action="{{ route('destroy', $blog->id) }}" method="POST" onsubmit="return confirm('本当にこの投稿を削除してもよろしいですか？');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger">削除</button>
+        </form>
+    @endif
+    
+    
     <div class="user"><!--ユーザー名&アイコン-->
         <img src="" alt="user_icon">
         <span>{{$blog -> user -> name}}</span>
