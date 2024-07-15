@@ -30,14 +30,12 @@
                        
                                 
                 @if (isset($blog ->blogComments) && count($blog->blogComments) > 0)
-                    @foreach ($blog->blogComments as $comment)
                         <div class="user"><!--コメントユーザー名&アイコン-->
                             <img src="" alt="user_icon">
-                            <span>{{$comment->user->name}}</span>
-                            <p class="body">{{$comment->comment}}</p><!--blog本文-->
+                            <span>{{$last_comments[$blog->id]->user->name}}</span><!--blogのリレーションから取得していたものを解除したためエラー発生-->
+                            <p class="body">{{$last_comments[$blog->id]->comment}}</p><!--blog本文-->
                         </div>
-                        <div class="comment">{{ $comment->content }}</div>
-                    @endforeach
+                        <div class="comment">{{$last_comments[$blog->id]->content}}</div>
                 @else
                     <div class="no_comments">コメントはまだありません</div>
                 @endif

@@ -23,20 +23,26 @@ class BlogController extends Controller
         $users = $user -> get();
         $blogs = $blog -> with(['user','blogComments','likes'])->orderBy('created_at','desc') -> get();
         
-        $like_count = [];//blogsテーブルのidを使用して関連するコメントの数を返す
-        foreach($blogs as $single_blog){
-            $like_count[$single_blog->id] = $single_blog  -> likes -> count();
-        }
-        
-        $comment_count = [];//blogsテーブルのidを使用して関連するいいねの数を返す
-        foreach($blogs as $single_blog){
-            $comment_count[$single_blog->id] = $single_blog  -> blogComments -> count();
+        $like_count = [];
+        $comment_count = [];
+        $last_comments = [];
+    
+        foreach ($blogs as $single_blog) {
+            // いいねの数をカウント
+            $like_count[$single_blog->id] = $single_blog->likes->count();
+            
+            // コメントの数をカウント
+            $comment_count[$single_blog->id] = $single_blog->blogComments->count();
+            
+            // 最新のコメントを取得
+            $last_comments[$single_blog->id] = $single_blog->blogComments->sortByDesc('created_at')->first();
         }
         return view('blog.index') -> with([
             'users' => $users,
             'blogs' => $blogs,
             'comment_count' => $comment_count,
-            'like_count' => $like_count
+            'like_count' => $like_count,
+            'last_comments' => $last_comments 
             ]);
     }
     
