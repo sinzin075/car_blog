@@ -19,6 +19,7 @@ Route::get('/', [BlogController::class,'index'])->name('index')->middleware('aut
 Route::get('/post/create',[BlogController::class,'post'])->name('post');//新しい投稿画面view側から遷移
 Route::post('/post/create',[BlogController::class,'upload'])->name('upload');
 Route::post('/post/good', [BlogController::class, 'good'])->name('good')->middleware('auth');
+Route::get('/status/{userId}',[BlogController::class,'status'])->name('status');
 
 Route::delete('/blog/delete/{blog}', [BlogController::class, 'destroy'])->name('destroy');
 

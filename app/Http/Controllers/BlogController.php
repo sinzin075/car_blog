@@ -125,17 +125,35 @@ class BlogController extends Controller
             'event_comments' => $event_comments,
             ]);
     }
-
-    public function status($userId , User $user , Blog $blog , BlogComment $blog_comment , Car $car){//定義完了
+    
+    public function status($userId){//定義完了
         $user = User::findOrFail($userId);// 特定のユーザーを取得する
-        $followersCount = $user->followers()->count();// フォロワー数とフォロー数を取得する
-        $followingsCount = $user->followings()->count();
+        $followersCount = $user->follows()->count();// フォロワー数とフォロー数を取得する
+        $followingsCount = $user->follows()->count();
         
-        $blogs = Blog::where('user_id',$user -> id) -> get();//特定のユーザーのblogデータを取得する
+        $blogs = Blog::where('user_id',$userId) -> get();//特定のユーザーのblogデータを取得する
         $blogIds = $blogs->pluck('id');//特定のユーザーのidのみを取得する
         $blog_comments = BlogComment::whereIn('blog_id' , $blogIds)->get();//取得したidが保存されているblog_commentのレコードを取得する
         
-        $cars = Car::where('user_id',$user -> id) -> get();//特定のユーザーのcarデータを取得する
+        $like_count = [];
+        $comment_count = [];
+        $last_comments = [];
+    
+        foreach ($blogs as $single_blog) {
+            // いいねの数をカウント
+            $like_count[$single_blog->id] = $single_blog->likes->count();
+            
+            // コメントの数をカウント
+            $comment_count[$single_blog->id] = $single_blog->blogComments->count();
+            
+            // 最新のコメントを取得
+            $last_comments[$single_blog->id] = $single_blog->blogComments->sortByDesc('created_at')->first();
+        }
+        
+        // ユーザーのcar_idを取得する
+        $carIds = [$user->car1_id, $user->car2_id, $user->car3_id];
+
+        $cars = Car::whereIn('id', $carIds)->get();
         
         return view('blog.status') -> with([
             'user' => $user,
@@ -144,6 +162,9 @@ class BlogController extends Controller
             'blogs' => $blogs,
             'blog_comments' => $blog_comments,
             'cars' => $cars,
+            'comment_count' => $comment_count,
+            'like_count' => $like_count,
+            'last_comments' => $last_comments
             ]);
     }
 
