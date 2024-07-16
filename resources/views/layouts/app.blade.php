@@ -23,9 +23,9 @@
                 <header class="bg-white shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <ul>
-                        <li><a href="">Blog</a></li><!--blog画面へ遷移-->
+                        <li><a href="{{route('index')}}">Blog</a></li><!--blog画面へ遷移-->
                         <li><a href="">Event</a></li><!--event画面へ遷移-->
-                        <li><a href="">Users</a></li><!--userstatus画面へ遷移-->
+                        <li><a href="{{ route('status',Auth::user()->id) }}">Users</a></li><!--userstatus画面へ遷移-->
                     </ul>
                     </div>
                 </header>
