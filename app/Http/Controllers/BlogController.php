@@ -167,6 +167,15 @@ class BlogController extends Controller
             'last_comments' => $last_comments
             ]);
     }
+    
+    public function statusChange($userId){
+        $user = User::findOrFail($userId)->get();
+        
+        return view('blog.statusChange')->with(['user'=>$user]);
+    }
+
+
+
 
     public function good(Request $request){//いいね機能
         $user = Auth::id(); //ユーザーIDを取得

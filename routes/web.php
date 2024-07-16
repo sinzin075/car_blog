@@ -14,21 +14,19 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-Route::get('/', [BlogController::class,'index'])->name('index')->middleware('auth');//初期画面
-Route::get('/post/create',[BlogController::class,'post'])->name('post');//新しい投稿画面view側から遷移
-Route::post('/post/create',[BlogController::class,'upload'])->name('upload');
-Route::post('/post/good', [BlogController::class, 'good'])->name('good')->middleware('auth');
-Route::get('/status/{userId}',[BlogController::class,'status'])->name('status');
-
-Route::delete('/blog/delete/{blog}', [BlogController::class, 'destroy'])->name('destroy');
-
-
-Route::get('/post/comment/{blog}',[BlogController::class,'comment'])->name('comment');//投稿に対するコメント画面
-Route::post('/post/comment/{blog}',[BlogController::class,'commentUpload'])->name('commentUpload');//コメント保存
-
-Route::get('/post/{blog}',[BlogController::class,'show'])->name('show');//投稿詳細画面
-
+Route::middleware('auth')->group(function () {
+    Route::get('/', [BlogController::class,'index'])->name('index');//初期画面
+    Route::get('/post/create',[BlogController::class,'post'])->name('post');//新しい投稿画面view側から遷移
+    Route::post('/post/create',[BlogController::class,'upload'])->name('upload');
+    Route::post('/post/good', [BlogController::class, 'good'])->name('good');
+    Route::get('/status/{userId}',[BlogController::class,'status'])->name('status');
+    Route::get('/status/change/{userId}',[BlogController::class,'statusChange'])->name('statusChange');
+    Route::post('/status/change/upload/',[BlogController::class,'statusChangeUpload'])->name('statusChangeUpload');
+    Route::delete('/blog/delete/{blog}', [BlogController::class, 'destroy'])->name('destroy');
+    Route::get('/post/comment/{blog}',[BlogController::class,'comment'])->name('comment');//投稿に対するコメント画面
+    Route::post('/post/comment/{blog}',[BlogController::class,'commentUpload'])->name('commentUpload');//コメント保存
+    Route::get('/post/{blog}',[BlogController::class,'show'])->name('show');//投稿詳細画面
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
