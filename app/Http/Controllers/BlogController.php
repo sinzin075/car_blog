@@ -104,13 +104,13 @@ class BlogController extends Controller
         $Event -> save();
 
         // ここではデータをそのままビューに渡す
-        return redirect()->route('event')->with('success', 'Event post created successfully!');
+        return redirect()->route('event.event')->with('success', 'Event post created successfully!');
     }
     
-        public function Eventshow($id){//投稿内容の詳細ページ
-        $event = Event::with(['user','eventComments','Event_likes'])->findOrFail($id);
+    public function Eventshow($id){//投稿内容の詳細ページ
+        $event = Event::with(['user','eventComment','Event_likes'])->findOrFail($id);
         
-        return view('blog.show')->with([
+        return view('blog.EventShow')->with([
             'event' => $event,
             ]);
     }
@@ -138,7 +138,7 @@ class BlogController extends Controller
         $event_comment -> comment = $request->comment;
         $event_comment -> save();
         
-        return redirect()->route('evnet');
+        return redirect()->route('event.evnet');
     }
 
 
@@ -342,9 +342,9 @@ class BlogController extends Controller
         // ログインユーザーが投稿者であるかをチェック
         if (Auth::check() && Auth::user()->id == $event->user_id) {
             $event->delete();
-            return redirect()->route('event')->with('success', '投稿を削除しました！');
+            return redirect()->route('event.event')->with('success', '投稿を削除しました！');
         } else {
-            return redirect()->route('event')->with('error', '削除権限がありません。');
+            return redirect()->route('event.event')->with('error', '削除権限がありません。');
         }
     }
 }

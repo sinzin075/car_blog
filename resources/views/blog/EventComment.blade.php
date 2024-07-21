@@ -12,7 +12,7 @@
     <p class="body">{{$event -> body}}</p><!--blog本文-->
     <p><img src="{{$event -> photo}}"></p>
     
-     <form action="{{route('commentUpload',['event' => $event ->id])}}" method="POST" enctype="multipart/form-data">
+     <form action="{{route('EventCommentUpload',['event' => $event ->id])}}" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="text" name="comment" placeholder="コメントをしよう！" value={{old('comment.comment')}}>
         <input type="submit" value="コメント">
