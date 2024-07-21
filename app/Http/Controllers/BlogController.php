@@ -107,6 +107,42 @@ class BlogController extends Controller
         return redirect()->route('event')->with('success', 'Event post created successfully!');
     }
     
+        public function Eventshow($id){//投稿内容の詳細ページ
+        $event = Event::with(['user','eventComments','Event_likes'])->findOrFail($id);
+        
+        return view('blog.show')->with([
+            'event' => $event,
+            ]);
+    }
+    
+    public function EventComment($id){//投稿に対するコメント
+        $event = Event::with('user') -> findOrFail($id);//投稿と投稿ユーザー情報
+        $commentUser = Auth::user();//ログインユーザー(コメントする人)
+        
+        return view('blog.EventComment')->with([
+            'event' => $event,
+            'commentUser'=>$commentUser
+            ]);
+    }
+    
+    public function EventCommentUpload(Request $request): RedirectResponse
+    {//postから送信されたフォームの保存
+        // バリデーション
+        $this->validate($request, [
+            'comment' => 'required|string|max:300'
+        ]);
+        // データベースに保存
+        $event_comment = new EventComment;
+        $event_comment -> user_id = Auth::id(); // ログインユーザーのIDを設定
+        $event_comment -> event_id = $request -> event;
+        $event_comment -> comment = $request->comment;
+        $event_comment -> save();
+        
+        return redirect()->route('evnet');
+    }
+
+
+    
     
     public function show($id){//投稿内容の詳細ページ
         $blog = Blog::with(['user','blogComments','likes'])->findOrFail($id);
@@ -267,6 +303,25 @@ class BlogController extends Controller
         return redirect()->back();
     }
     
+    public function EventGood(Request $request){//いいね機能
+        $user = Auth::id(); //ユーザーIDを取得
+        $event = $request->input('event');
+    
+        $like = Event_Likes::where('user_id', $user)->where('event_id', $event)->first();
+    
+        if ($like) {// いいねがすでに存在する場合、削除する
+            $like->delete();
+        } else {// いいねが存在しない場合、作成する
+            Event_Likes::create([
+                'user_id' => $user,
+                'event_id' => $event,
+            ]);
+        }
+        return redirect()->back();
+    }
+    
+    
+    
     public function destroy($id)
     {
         $blog = Blog::findOrFail($id);
@@ -277,6 +332,19 @@ class BlogController extends Controller
             return redirect()->route('index')->with('success', '投稿を削除しました！');
         } else {
             return redirect()->route('index')->with('error', '削除権限がありません。');
+        }
+    }
+    
+    public function EventDestroy($id)
+    {
+        $event = Event::findOrFail($id);
+    
+        // ログインユーザーが投稿者であるかをチェック
+        if (Auth::check() && Auth::user()->id == $event->user_id) {
+            $event->delete();
+            return redirect()->route('event')->with('success', '投稿を削除しました！');
+        } else {
+            return redirect()->route('event')->with('error', '削除権限がありません。');
         }
     }
 }
