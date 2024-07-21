@@ -14,6 +14,8 @@ use App\Models\Follow;
 use App\Models\Likes;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+
 
 
 
@@ -44,6 +46,65 @@ class BlogController extends Controller
             'like_count' => $like_count,
             'last_comments' => $last_comments 
             ]);
+    }
+    
+    public function event(User $user,Event $event,EventComment $event_comment,){//index画面設定
+        $users = $user -> get();
+        $events = $event -> with(['user','EventComment','Event_likes'])->orderBy('created_at','desc') -> get();
+        
+        return view('blog.event') -> with([
+            'users' => $users,
+            'events' => $events,
+            ]);
+    }
+    public function EventPost(User $user){//新しい投稿ページ用
+        $user -> get();
+        return view('blog.EventPost')->with('user',$user);
+    }
+    
+    public function EventUpload(Request $request){
+        $request -> validate([
+            'title' => 'required|string|max:35',
+            'body' => 'required|string|max:300',
+            'address' => 'required|string',
+            ]);
+        
+        $user = Auth::id();
+        //画像を食らうディナリーに保存しURLを作成
+        $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
+        
+        $address = $request->input('address');
+        // Google Maps APIのエンドポイントとAPIキー
+        $endpoint = 'https://maps.googleapis.com/maps/api/geocode/json';
+        $apiKey = config('services.google_maps.api_key'); // 自分のAPIキーに置き換える
+        // google maps APIリクエストの送信
+        $response = Http::get($endpoint, [
+            'address' => $address,
+            'key' => $apiKey,
+        ]);
+          // レスポンスの取得
+        $locationData = $response->json();//受け取り方が配列になってしますため、カラムの増設をしてデータを文字列に変更する
+        
+        if (isset($locationData['results'][0])) {
+            $firstResult = $locationData['results'][0];
+        }
+        
+        $geometry = $firstResult['geometry'];
+        $lat = $geometry['location']['lat'];
+        $lng = $geometry['location']['lng'];
+
+        $Event = new Event;
+        $Event -> user_id = $user;
+        $Event -> title = $request ->title;
+        $Event -> body = $request ->body;
+        $Event -> photo = $uploadedFileUrl;
+        $Event -> address = $address;
+        $Event -> lat = $lat;
+        $Event -> lng = $lng;
+        $Event -> save();
+
+        // ここではデータをそのままビューに渡す
+        return redirect()->route('event')->with('success', 'Event post created successfully!');
     }
     
     
@@ -113,18 +174,6 @@ class BlogController extends Controller
         
         return redirect()->route('index');
     }
-
-    public function event(User $user,Event $event,EventComment $event_comment){//定義未完了
-        $users = $user -> get();
-        $events = $event -> get();
-        $event_comments = $eventc_comment -> get();
-        
-        return view('blog.event') -> with([
-            'users' => $users,
-            'events' => $events,
-            'event_comments' => $event_comments,
-            ]);
-    }
     
     public function status($userId){//定義完了
         $user = User::findOrFail($userId);// 特定のユーザーを取得する
@@ -169,9 +218,33 @@ class BlogController extends Controller
     }
     
     public function statusChange($userId){
-        $user = User::findOrFail($userId)->get();
+        $user = User::findOrFail($userId);
         
         return view('blog.statusChange')->with(['user'=>$user]);
+    }
+    
+    public function statusChangeUpload(Request $request){//postから送信されたフォームの保存
+        // バリデーション
+        $this->validate($request, [
+            'name' => 'required|string|max:255',
+            'photo' => 'nullable|string|max:255',
+            'car2_id' => 'nullable|integer',
+            'car3_id' => 'nullable|integer',
+            'greeting' => 'nullable|string|max:300',
+        ]);
+        // 画像のアップロード
+        $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
+        // データベースに保存
+        $user = User::find($id);
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->photo = $request->input($uploadedFileUrl);
+        $user->car2_id = $request->input('car2_id');
+        $user->car3_id = $request->input('car3_id');
+        $user->greeting = $request->input('greeting');
+        $user->save();
+            
+        return redirect()->route('index')->with('success', 'Blog post created successfully!');
     }
 
 

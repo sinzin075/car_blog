@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('blog_comments', function (Blueprint $table) {
-            $table->id(); // IDカラムを追加
+        Schema::create('event_likes', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('blog_id')->constrained('blogs')->onDelete('cascade');
-            $table->string('comment', 300); // コメント文
-            $table->integer('good')->unsigned()->default(0)->nullable();
+            $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
             $table->timestamps();
-            $table->softDeletes();
-        }); 
+
+            $table->unique(['user_id', 'event_id']); // ユーザーが一つの投稿に対して一度しかいいねできないようにする
+        });
     }
 
     /**
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('blog_comments');
+        Schema::dropIfExists('event_likes');
     }
 };

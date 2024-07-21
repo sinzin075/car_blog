@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('car1_id')->nullable()->constrained('cars')->nullOnDelete(); // 3台まで登録可能
             $table->foreignId('car2_id')->nullable()->constrained('cars')->nullOnDelete();
             $table->foreignId('car3_id')->nullable()->constrained('cars')->nullOnDelete();
-            $table->string('greeting', 300); // 挨拶
+            $table->string('greeting', 300)->nullable(); // 挨拶
             $table->rememberToken();
             $table->timestamps();
         });

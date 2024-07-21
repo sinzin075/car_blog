@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('photo')->nullable();//s3の保存先ファイルパス
             $table->integer('good')->default(0);//いいね数
             $table->string('address');//実施未定
+            $table->double('lat', 10, 8); // latカラムの追加 (小数点以下8桁)
+            $table->double('lng', 11, 8); // lngカラムの追加 (小数点以下8桁)
             $table->timestamps();
             $table->softDeletes();
         });

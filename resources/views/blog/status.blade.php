@@ -16,13 +16,13 @@
     <div class="user_car"><!--ユーザーの愛車一覧-->
         <ul>
             @if (isset($user ->car1_id))<!--愛車登録がある場合のみ表示-->
-            <li>
-                <p>愛車‗1</p>
-                <img src="" alt="ユーザーの愛車1">
-                <span>{{$car[$user->car1_id]->name}}</span>
-            </li>
+                <li>
+                    <p>愛車‗1</p>
+                    <img src="" alt="ユーザーの愛車1">
+                    <span>{{$car[$user->car1_id]->name}}</span>
+                </li>
             @else
-            <p>愛車登録がまだありません</p>
+                <p>愛車登録がまだありません</p>
             @endif
             @if (isset($user ->car2_id))
             <li>
