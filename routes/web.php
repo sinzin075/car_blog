@@ -15,31 +15,34 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/', [BlogController::class,'index'])->name('index');//初期画面
-   
-    Route::get('/blogs/create',[BlogController::class,'post'])->name('post');//新しい投稿画面view側から遷移
-    Route::post('/blogs',[BlogController::class,'upload'])->name('upload');
-    Route::post('/blogs/good', [BlogController::class, 'good'])->name('good');
-   
-    Route::get('/events',[BlogController::class, 'event'])->name('event');
-    Route::get('/events/create',[BlogController::class,'EventPost'])->name('EventPost');
-    Route::post('/events/create/upload',[BlogController::class,'EventUpload'])->name('EventUpload');
-    Route::post('/events/good', [BlogController::class, 'EventGood'])->name('EventGood');
+    Route::get('/', [BlogController::class, 'index'])->name('index'); // 初期画面
     
-    
-    Route::get('/status/{userId}',[BlogController::class,'status'])->name('status');
-    Route::get('/status/change/{userId}',[BlogController::class,'statusChange'])->name('statusChange');
-    Route::post('/status/change/upload/',[BlogController::class,'statusChangeUpload'])->name('statusChangeUpload');
-    
-    Route::delete('/blogs/delete/{blog}', [BlogController::class, 'destroy'])->name('destroy');
-    Route::get('/blogs/comment/{blog}',[BlogController::class,'comment'])->name('comment');//投稿に対するコメント画面
-    Route::post('/blogs/comment/{blog}',[BlogController::class,'commentUpload'])->name('commentUpload');//コメント保存
-    Route::get('/blogs/{blog}',[BlogController::class,'show'])->name('show');//投稿詳細画面
-    
-    Route::delete('/events/delete/{event}', [BlogController::class, 'EventDestroy'])->name('EventDestroy');
-    Route::get('/events/comment/{event}',[BlogController::class,'EventComment'])->name('EventComment');//投稿に対するコメント画面
-    Route::post('/events/comment/{event}',[BlogController::class,'EventCommentUpload'])->name('EventCommentUpload');//コメント保存
-    Route::get('/events/{event}',[BlogController::class,'EventShow'])->name('EventShow');//投稿詳細画面
+    // Blog Routes
+    Route::prefix('blogs')->name('blog.')->group(function () {
+        Route::get('/create', [BlogController::class, 'post'])->name('post');
+        Route::post('/', [BlogController::class, 'upload'])->name('upload');
+        Route::post('/good', [BlogController::class, 'good'])->name('good');
+        Route::delete('/delete/{blog}', [BlogController::class, 'destroy'])->name('destroy');
+        Route::get('/comment/{blog}', [BlogController::class, 'comment'])->name('comment');
+        Route::post('/comment/{blog}', [BlogController::class, 'commentUpload'])->name('commentUpload');
+        Route::get('/{blog}', [BlogController::class, 'show'])->name('show');
+    });
+
+    // Event Routes
+    Route::prefix('events')->name('event.')->group(function () {
+        Route::get('/', [BlogController::class, 'event'])->name('event');
+        Route::get('/create', [BlogController::class, 'EventPost'])->name('EventPost');
+        Route::post('/create/upload', [BlogController::class, 'EventUpload'])->name('EventUpload');
+        Route::post('/good', [BlogController::class, 'EventGood'])->name('EventGood');
+        Route::delete('/delete/{event}', [BlogController::class, 'EventDestroy'])->name('EventDestroy');
+        Route::get('/comment/{event}', [BlogController::class, 'EventComment'])->name('EventComment'); // 投稿に対するコメント画面
+        Route::post('/comment/{event}', [BlogController::class, 'EventCommentUpload'])->name('EventCommentUpload'); // コメント保存
+        Route::get('/{event}', [BlogController::class, 'EventShow'])->name('EventShow'); // 投稿詳細画面
+    });
+
+    Route::get('/status/{userId}', [BlogController::class, 'status'])->name('status');
+    Route::get('/status/change/{userId}', [BlogController::class, 'statusChange'])->name('statusChange');
+    Route::post('/status/change/upload/', [BlogController::class, 'statusChangeUpload'])->name('statusChangeUpload');
 });
 
 Route::get('/dashboard', function () {

@@ -3,12 +3,12 @@
         Car Blog
     </x-slot>
     <div class="post"><!--投稿画面へ遷移-->
-        <a href="{{ route('EventPost')}}">new post</a>
+        <a href="{{ route('event.EventPost')}}">new post</a>
     </div>
 
     @foreach ($events as $event)
         <div class="post"><!--投稿内容-->
-            <a href={{route('EventShow',['event'=>$event->id])}}><!--投稿詳細へ遷移-->
+            <a href={{route('event.EventShow',['event'=>$event->id])}}><!--投稿詳細へ遷移-->
                 <div class="user"><!--ユーザー名&アイコン-->
                     <img src="" alt="user_icon">
                     <span>{{$event->user->name}}</span>
@@ -47,9 +47,9 @@
                     <div class="good">❤{{ $event->eventComments ? $event->eventComments->count() : 0 }}</div><!--いいね数-->
                 </span>
                 
-                <a href = {{route('EventComment',['event'=>$event->id])}}>comment</a><!--コメント画面へ遷移-->
+                <a href = {{route('event.EventComment',['event'=>$event->id])}}>comment</a><!--コメント画面へ遷移-->
                 
-                <form action="{{route('EventGood',['event' => $event ->id])}}" method="POST" enctype="multipart/form-data"><!--いいねボタン-->
+                <form action="{{route('event.EventGood',['event' => $event ->id])}}" method="POST" enctype="multipart/form-data"><!--いいねボタン-->
                     @csrf
                     <input type="submit" value="いいね"><!--ボタンの生成-->
                 </form>

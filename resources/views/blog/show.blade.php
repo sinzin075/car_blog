@@ -2,7 +2,7 @@
     
     <!-- 削除ボタンの表示 -->
     @if (Auth::check() && Auth::user()->id == $blog->user_id)
-        <form action="{{ route('destroy', $blog->id) }}" method="POST" onsubmit="return confirm('本当にこの投稿を削除してもよろしいですか？');">
+        <form action="{{ route('blog.destroy', $blog->id) }}" method="POST" onsubmit="return confirm('本当にこの投稿を削除してもよろしいですか？');">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-danger">削除</button>
@@ -25,9 +25,9 @@
     </span>
     
     
-    <a href = {{route('comment',['blog'=>$blog->id])}}>comment</a><!--コメント画面へ遷移-->
+    <a href = {{route('blog.comment',['blog'=>$blog->id])}}>comment</a><!--コメント画面へ遷移-->
     
-    <form action="{{route('good',['blog' => $blog ->id])}}" method="POST" enctype="multipart/form-data"><!--いいねボタン-->
+    <form action="{{route('blog.good',['blog' => $blog ->id])}}" method="POST" enctype="multipart/form-data"><!--いいねボタン-->
         @csrf
         <input type="submit" value="いいね"><!--ボタンの生成-->
     </form>

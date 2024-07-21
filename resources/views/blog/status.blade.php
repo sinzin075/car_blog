@@ -44,7 +44,7 @@
     
     @foreach ($blogs as $blog)
         <div class="post"><!--投稿内容-->
-            <a href={{route('show',['blog'=>$blog->id])}}><!--投稿詳細へ遷移-->
+            <a href={{route('blog.show',['blog'=>$blog->id])}}><!--投稿詳細へ遷移-->
                 <div class="user"><!--ユーザー名&アイコン-->
                     <img src="" alt="user_icon">
                     <span>{{$blog->user->name}}</span>
@@ -57,9 +57,9 @@
                     <div class="good">❤{{$like_count[$blog->id]}}</div><!--いいね数-->
                 </span>
                 
-                <a href = {{route('comment',['blog'=>$blog->id])}}>comment</a><!--コメント画面へ遷移-->
+                <a href = {{route('blog.comment',['blog'=>$blog->id])}}>comment</a><!--コメント画面へ遷移-->
                 
-                <form action="{{route('good',['blog' => $blog ->id])}}" method="POST" enctype="multipart/form-data"><!--いいねボタン-->
+                <form action="{{route('blog.good',['blog' => $blog ->id])}}" method="POST" enctype="multipart/form-data"><!--いいねボタン-->
                     @csrf
                     <input type="submit" value="いいね"><!--ボタンの生成-->
                 </form>
