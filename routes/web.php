@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/events',[BlogController::class, 'event'])->name('event');
     Route::get('/events/create',[BlogController::class,'EventPost'])->name('EventPost');
     Route::post('/events/create/upload',[BlogController::class,'EventUpload'])->name('EventUpload');
+    Route::post('/events/good', [BlogController::class, 'EventGood'])->name('EventGood');
     
     
     Route::get('/status/{userId}',[BlogController::class,'status'])->name('status');
@@ -34,6 +35,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/blogs/comment/{blog}',[BlogController::class,'comment'])->name('comment');//投稿に対するコメント画面
     Route::post('/blogs/comment/{blog}',[BlogController::class,'commentUpload'])->name('commentUpload');//コメント保存
     Route::get('/blogs/{blog}',[BlogController::class,'show'])->name('show');//投稿詳細画面
+    
+    Route::delete('/events/delete/{event}', [BlogController::class, 'EventDestroy'])->name('EventDestroy');
+    Route::get('/events/comment/{event}',[BlogController::class,'EventComment'])->name('EventComment');//投稿に対するコメント画面
+    Route::post('/events/comment/{event}',[BlogController::class,'EventCommentUpload'])->name('EventCommentUpload');//コメント保存
+    Route::get('/events/{event}',[BlogController::class,'EventShow'])->name('EventShow');//投稿詳細画面
 });
 
 Route::get('/dashboard', function () {
