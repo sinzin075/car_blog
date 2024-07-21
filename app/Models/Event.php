@@ -15,6 +15,16 @@ class Event extends Model
     
     public function EventComment(){
         return $this->hasMany(EventComment::class);
+    }
     
+        
+    public function Event_likes()
+    {
+        return $this->hasMany(Event_Likes::class);
+    }
+    
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'Event_likes');
     }
 }

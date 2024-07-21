@@ -3,11 +3,17 @@
         Car Blog
     </x-slot>
     <!--変更点-->
-    <form action="{{route('statusCanageUpload')}}" method="POST" enctype="multipart/form-data">
+    <form action="{{route('statusChangeUpload')}}" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="text" name="name" placeholder="ユーザー名" value={{old($user->name)}}>
-        <input type="file" name="photo" value={{old($user->photo) }}><!--クラウディナリーを使用して画像を保存-->
-        <input type="textarea" name="greeting" value={{old($user->greeting) }}>
+                <!-- 現在の写真を表示 -->
+        @if($user->photo)
+            <div>
+                <img src="{{ $user->photo }}" alt="Current Photo">
+            </div>
+        @endif
+        <input type="file" name="photo"><!--クラウディナリーを使用して画像を保存-->
+        <textarea name="greeting">{{ old('user->greeting',$user->greeting) }}</textarea>
         <input type="submit" value="登録">
     </form>
     

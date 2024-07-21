@@ -61,10 +61,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Likes::class);
     }
+    
+    public function Event_likes()
+    {
+        return $this->hasMany(Likes::class);
+    }
 
     public function likedBlogs()
     {
         return $this->belongsToMany(Blog::class, 'likes');
+    }
+    
+    public function likedEvents()
+    {
+        return $this->belongsToMany(Blog::class, 'Event_likes');
     }
     
     public function follows(){//ユーザーがフォローしているほかのユーザーを取得
