@@ -1,12 +1,9 @@
-<x-app-layout>
-    <x-slot name="header">
-        Car Blog
-    </x-slot>
+<section>
     <!--変更点-->
+    <h2 class="text-lg font-medium text-gray-900">ユーザー詳細設定</h2>
+    
     <form action="{{route('statusChangeUpload')}}" method="POST" enctype="multipart/form-data">
         @csrf
-        <input type="text" name="name" placeholder="ユーザー名" value={{old($user->name)}}>
-                <!-- 現在の写真を表示 -->
         @if($user->photo)
             <div>
                 <img src="{{ $user->photo }}" alt="Current Photo">
@@ -44,4 +41,4 @@
             @endif
         </ul>
     </div>
-</x-app-layout>
+</section>

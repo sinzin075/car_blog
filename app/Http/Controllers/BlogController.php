@@ -282,7 +282,24 @@ class BlogController extends Controller
             
         return redirect()->route('index')->with('success', 'Blog post created successfully!');
     }
+    
+    public function carList(car $car) {
+            // 'id'カラムで昇順に並べ替え
+        $cars = Car::with(['maker.country'])
+                   ->orderBy('id', 'asc')
+                   ->get()
+                   ->groupBy(function($car) {
+                       return $car->maker->country->name;
+                   });
 
+        return view('blog.carList', ['cars' => $cars]);
+    }
+    
+    public function carUpload(Request $request){
+        if($request ->country ==='その他'){
+            //countryとmakerテーブルを新規作成する必要あり
+        }
+    }
 
 
 

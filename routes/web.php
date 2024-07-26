@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::middleware('auth')->group(function () {
     Route::get('/', [BlogController::class, 'index'])->name('index'); // 初期画面
+    Route::get('/carList',[BlogController::class,'carList'])->name('carList');
     
     // Blog Routes
     Route::prefix('blogs')->name('blog.')->group(function () {
