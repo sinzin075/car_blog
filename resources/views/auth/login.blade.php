@@ -43,5 +43,8 @@
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
+        <div>
+            <a href="{{route('register')}}">アカウント登録がまだの方はこちらから</a>
+        </div>
     </form>
 </x-guest-layout>

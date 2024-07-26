@@ -2,7 +2,6 @@
     <x-slot name="header">
         Car Blog
     </x-slot>
-    <a href="{{ route('statusChange',Auth::user()->id) }}">ユーザーステータス変更</a>
     <div class="user"><!--ユーザー名&アイコン-->
         <img src="{{$user->photo}}" alt="user_icon">
         <span>{{$user->name}}</span>

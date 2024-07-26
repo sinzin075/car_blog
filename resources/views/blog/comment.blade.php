@@ -12,7 +12,7 @@
     <p class="body">{{$blog -> body}}</p><!--blog本文-->
     <p><img src="{{$blog -> photo}}"></p>
     
-     <form action="{{route('commentUpload',['blog' => $blog ->id])}}" method="POST" enctype="multipart/form-data">
+     <form action="{{route('blog.commentUpload',['blog' => $blog ->id])}}" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="text" name="comment" placeholder="コメントをしよう！" value={{old('comment.comment')}}>
         <input type="submit" value="コメント">
