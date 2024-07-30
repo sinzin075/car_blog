@@ -44,6 +44,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/status/{userId}', [BlogController::class, 'status'])->name('status');
     Route::get('/status/change/{userId}', [BlogController::class, 'statusChange'])->name('statusChange');
     Route::post('/status/change/upload/', [BlogController::class, 'statusChangeUpload'])->name('statusChangeUpload');
+    Route::post('/status/change/mycar/save',[BlogController::class,'carSave'])->name('carSave');
+    Route::get('/status/change/mycar/{userId}',[BlogController::class, 'carChoice'])->name('carChoice');
+    
 });
 
 Route::get('/dashboard', function () {

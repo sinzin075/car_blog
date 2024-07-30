@@ -13,6 +13,21 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+         <style>
+            .bg-car-light-gray {
+                background-color: #676;
+            }
+            .bg-car-dark-gray {
+                background-color: #735;
+            }
+            .text-car-accent-red {
+                color: #176;
+            }
+            .bg-car-accent-red {
+                background-color: #176;
+            }
+        </style>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
