@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'car1_id', 
+        'car2_id', 
+        'car3_id'
     ];
 
     /**
@@ -85,7 +88,19 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class,'follows','followed_id','follower_id');
     }
     
-    public function cars(){//ユーザーをフォローしているほかのユーザーを取得
-        return $this->belongsToMany(Car::class);
+    // 車のリレーションシップを定義
+    public function car1()
+    {
+        return $this->belongsTo(Car::class, 'car1_id');
+    }
+
+    public function car2()
+    {
+        return $this->belongsTo(Car::class, 'car2_id');
+    }
+
+    public function car3()
+    {
+        return $this->belongsTo(Car::class, 'car3_id');
     }
 }

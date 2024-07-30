@@ -49,12 +49,12 @@ class BlogController extends Controller
     }
     
     public function event(User $user,Event $event,EventComment $event_comment,){//index画面設定
-        $users = $user -> get();
-        $events = $event -> with(['user','EventComment','Event_likes'])->orderBy('created_at','desc') -> get();
+        $users = $user->get();
+        $events = $event->with(['user','EventComment','Event_likes'])->orderBy('created_at','desc')->get();
         
-        return view('blog.event') -> with([
-            'users' => $users,
-            'events' => $events,
+        return view('blog.event')->with([
+            'users'=>$users,
+            'events'=>$events,
             ]);
     }
     public function EventPost(User $user){//新しい投稿ページ用
@@ -185,6 +185,8 @@ class BlogController extends Controller
         return redirect()->route('index')->with('success', 'Blog post created successfully!');
     }
     
+    
+    
     public function comment($id){//投稿に対するコメント
         $blog = Blog::with('user') -> findOrFail($id);//投稿と投稿ユーザー情報
         $commentUser = Auth::user();//ログインユーザー(コメントする人)
@@ -259,29 +261,99 @@ class BlogController extends Controller
         return view('blog.statusChange')->with(['user'=>$user]);
     }
     
-    public function statusChangeUpload(Request $request){//postから送信されたフォームの保存
+    public function statusChangeUpload(Request $request)
+    {
         // バリデーション
         $this->validate($request, [
-            'name' => 'required|string|max:255',
-            'photo' => 'nullable|string|max:255',
-            'car2_id' => 'nullable|integer',
-            'car3_id' => 'nullable|integer',
+            'photo' => 'nullable|image|max:2048', // 画像ファイルのバリデーション
             'greeting' => 'nullable|string|max:300',
         ]);
+    
+        $user = Auth::user(); // 認証ユーザーの取得
+    
         // 画像のアップロード
-        $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
+        if ($request->hasFile('photo')) {
+            $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
+            $user->photo = $uploadedFileUrl; // URLを直接保存
+        }
+    
         // データベースに保存
-        $user = User::find($id);
-        $user->name = $request->input('name');
-        $user->email = $request->input('email');
-        $user->photo = $request->input($uploadedFileUrl);
-        $user->car2_id = $request->input('car2_id');
-        $user->car3_id = $request->input('car3_id');
         $user->greeting = $request->input('greeting');
         $user->save();
-            
+    
         return redirect()->route('index')->with('success', 'Blog post created successfully!');
     }
+
+    public function carChoice(car $car)
+    {
+        // 'id'カラムで昇順に並べ替え
+        $cars = Car::with(['maker.country'])
+                   ->orderBy('id', 'asc')
+                   ->get()
+                   ->groupBy(function($car) {
+                       return $car->maker->country->name;
+                   });
+
+        // 現在のユーザーを取得
+        $user = Auth::user();
+
+        // ユーザーが選択した車を取得、存在しない場合はnullを設定
+        $selectedCars = [
+            Car::find($user->car1_id),
+            Car::find($user->car2_id),
+            Car::find($user->car3_id)
+        ];
+
+        return view('blog.carChoice', [
+            'cars' => $cars,
+            'user' => $user,
+            'selectedCars' => $selectedCars,
+        ]);
+    }
+
+   public function carSave(Request $request)
+{
+    // デバッグログ
+    \Log::info('carSave request data', $request->all());
+
+    // バリデーション
+    $request->validate([
+        'car1_id' => 'nullable|exists:cars,id',
+        'car2_id' => 'nullable|exists:cars,id',
+        'car3_id' => 'nullable|exists:cars,id',
+    ]);
+
+    // 現在のユーザーを取得
+    $user = Auth::user();
+
+    // フォームから送信された車のIDを取得
+    $car1_id = $request->input('car1_id');
+    $car2_id = $request->input('car2_id');
+    $car3_id = $request->input('car3_id');
+
+    // デバッグログ
+    \Log::info('car1_id', ['car1_id' => $car1_id]);
+    \Log::info('car2_id', ['car2_id' => $car2_id]);
+    \Log::info('car3_id', ['car3_id' => $car3_id]);
+
+    // ユーザーの選択をデータベースに保存
+    $user->car1_id = $car1_id;
+    $user->car2_id = $car2_id;
+    $user->car3_id = $car3_id;
+
+    // 保存前のデバッグログ
+    \Log::info('User before save', ['user' => $user]);
+
+    $user->save();
+
+    // 保存後のデバッグログ
+    \Log::info('User saved', ['user' => $user]);
+
+    // 成功メッセージと共に特定のルートにリダイレクト
+    return redirect()->route('profile.edit')->with('success', 'Your car selections have been saved.');
+}
+
+    
     
     public function carList(car $car) {
             // 'id'カラムで昇順に並べ替え
@@ -300,8 +372,6 @@ class BlogController extends Controller
             //countryとmakerテーブルを新規作成する必要あり
         }
     }
-
-
 
     public function good(Request $request){//いいね機能
         $user = Auth::id(); //ユーザーIDを取得
