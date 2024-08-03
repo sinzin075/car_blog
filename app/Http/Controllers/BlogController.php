@@ -12,6 +12,7 @@ use App\Models\EventComment;
 use App\Models\Car;
 use App\Models\Follow;
 use App\Models\Likes;
+use App\Models\Event_Likes;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -25,43 +26,25 @@ class BlogController extends Controller
         $users = $user->get();
         $blogs = $blog->with(['user', 'blogComments', 'likes'])->orderBy('created_at', 'desc')->get();
 
-        $like_count = [];
-        $comment_count = [];
-        $last_comments = [];
-
-        foreach ($blogs as $single_blog) {
-            // いいねの数をカウント
-            $like_count[$single_blog->id] = $single_blog->likes->count();
-
-            // コメントの数をカウント
-            $comment_count[$single_blog->id] = $single_blog->blogComments->count();
-
-            // 最新のコメントを取得
-            $last_comments[$single_blog->id] = $single_blog->blogComments->sortByDesc('created_at')->first();
-        }
         return view('blog.index')->with([
             'users' => $users,
             'blogs' => $blogs,
-            'comment_count' => $comment_count,
-            'like_count' => $like_count,
-            'last_comments' => $last_comments
         ]);
     }
 
-    public function event(User $user, Event $event, EventComment $event_comment) // index画面設定
-    {
+    public function event(User $user,Event $event,EventComment $event_comment,){//index画面設定
         $users = $user->get();
-        $events = $event->with(['user', 'EventComment', 'Event_likes'])->orderBy('created_at', 'desc')->get();
-
+        $events = $event->with(['user','EventComment','Event_likes'])->orderBy('created_at','desc')->get();
+        
         return view('blog.event')->with([
-            'users' => $users,
-            'events' => $events,
-        ]);
+            'users'=>$users,
+            'events'=>$events,
+            ]);
     }
 
-    public function EventPost(User $user) // 新しい投稿ページ用
+    public function EventPost() // 新しい投稿ページ用
     {
-        $user->get();
+        $user = Auth::user();
         return view('blog.EventPost')->with('user', $user);
     }
 
@@ -108,7 +91,7 @@ class BlogController extends Controller
         $Event->save();
 
         // ここではデータをそのままビューに渡す
-        return redirect()->route('event.event')->with('success', 'Event post created successfully!');
+        return redirect()->route('blog.event')->with('success', 'Event post created successfully!');
     }
 
     public function Eventshow($id) // 投稿内容の詳細ページ
@@ -131,7 +114,7 @@ class BlogController extends Controller
         ]);
     }
 
-    public function EventCommentUpload(Request $request): RedirectResponse // postから送信されたフォームの保存
+    public function EventCommentUpload(Request $request)// postから送信されたフォームの保存
     {
         // バリデーション
         $this->validate($request, [
@@ -144,7 +127,7 @@ class BlogController extends Controller
         $event_comment->comment = $request->comment;
         $event_comment->save();
 
-        return redirect()->route('event.event');
+        return redirect()->route('blog.event');
     }
 
     public function show($id) // 投稿内容の詳細ページ
@@ -165,9 +148,9 @@ class BlogController extends Controller
     }
 
     // 保存の際の画像サイズ要検討
-    public function post(User $user) // 新しい投稿ページ用
+    public function post() // 新しい投稿ページ用
     {
-        $user->get();
+        $user = Auth::user();
         return view('blog.post')->with('user', $user);
     }
 
@@ -422,17 +405,16 @@ class BlogController extends Controller
         }
         return redirect()->back();
     }
-
-    public function EventGood(Request $request) // いいね機能
-    {
-        $user = Auth::id(); // ユーザーIDを取得
+    
+    public function EventGood(Request $request){//いいね機能
+        $user = Auth::id(); //ユーザーIDを取得
         $event = $request->input('event');
-
+    
         $like = Event_Likes::where('user_id', $user)->where('event_id', $event)->first();
-
-        if ($like) { // いいねがすでに存在する場合、削除する
+    
+        if ($like) {// いいねがすでに存在する場合、削除する
             $like->delete();
-        } else { // いいねが存在しない場合、作成する
+        } else {// いいねが存在しない場合、作成する
             Event_Likes::create([
                 'user_id' => $user,
                 'event_id' => $event,
@@ -440,7 +422,7 @@ class BlogController extends Controller
         }
         return redirect()->back();
     }
-
+    
     public function destroy($id)
     {
         $blog = Blog::findOrFail($id);
