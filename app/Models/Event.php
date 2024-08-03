@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Event extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'body',
+        'photo',
+    ];
     
     public function User(){
         return $this->belongsTo(User::class);

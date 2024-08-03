@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Event_Likes extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'event_likes';
     protected $fillable = ['user_id', 'event_id'];
 
