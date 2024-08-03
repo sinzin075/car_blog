@@ -25,6 +25,7 @@ class BlogController extends Controller
     {
         $users = $user->get();
         $blogs = $blog->with(['user', 'blogComments', 'likes'])->orderBy('created_at', 'desc')->get();
+        
 
         return view('blog.index')->with([
             'users' => $users,
@@ -127,7 +128,7 @@ class BlogController extends Controller
         $event_comment->comment = $request->comment;
         $event_comment->save();
 
-        return redirect()->route('blog.event');
+        return redirect()->route('event.event');
     }
 
     public function show($id) // 投稿内容の詳細ページ
