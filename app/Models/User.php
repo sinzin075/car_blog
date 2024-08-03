@@ -23,7 +23,10 @@ class User extends Authenticatable
         'password',
         'car1_id', 
         'car2_id', 
-        'car3_id'
+        'car3_id',
+        'car1_photo', // 追加
+        'car2_photo', // 追加
+        'car3_photo', // 追加
     ];
 
     /**

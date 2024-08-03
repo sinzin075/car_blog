@@ -5,8 +5,8 @@
         </div>
     </x-slot>
     
-    <div class="post p-4 mt-16"><!--投稿画面へ遷移-->
-        <a href="{{ route('blog.post')}}" class="text-car-accent-red">new post</a>
+    <div class="post p-4 mt-16 text-center"><!--投稿画面へ遷移-->
+        <a href="{{ route('blog.post')}}" class="btn-new-post">new post</a>
     </div>
 
     @foreach ($blogs as $blog)
@@ -17,12 +17,12 @@
                         <img src="{{$blog->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
                         <span class="text-white font-bold text-xl" style="font-size: 20px;">{{$blog->user->name}}</span>
                     </div>
-                    <div class="user-background absolute inset-0 bg-car-accent-red">
-                        <div class="diagonal-lines"></div>
-                    </div>
+                    <div class="user-background absolute inset-0 bg-car-accent-red"></div>
                 </div>
                 <p class="body text-car-dark-gray mb-2">{{$blog->body}}</p><!--blog本文-->
-                <p><img src="{{$blog->photo}}" class="w-full h-auto rounded"></p>
+                <div class="image-container flex justify-center">
+                    <img src="{{$blog->photo}}" class="common-image rounded">
+                </div>
               
                 <div class="flex justify-between items-center mt-2">
                     <div class="flex space-x-4">
@@ -45,9 +45,7 @@
                             <span class="text-white font-bold text-xl" style="font-size: 20px;">{{$last_comments[$blog->id]->user->name}}</span>
                             <p class="body text-car-dark-gray ml-2">{{$last_comments[$blog->id]->comment}}</p><!--blog本文-->
                         </div>
-                        <div class="user-background absolute inset-0 bg-car-accent-red">
-                            <div class="diagonal-lines"></div>
-                        </div>
+                        <div class="user-background absolute inset-0 bg-car-accent-red"></div>
                     </div>
                 @else
                     <div class="no_comments text-car-dark-gray mt-4">コメントはまだありません</div>
@@ -71,6 +69,9 @@
         }
         .post {
             margin-bottom: 20px; /* 投稿間のスペースを追加 */
+            width: 60%; /* 投稿コンテナの幅を60%に設定 */
+            margin-left: auto; /* 中央寄せのための左マージン */
+            margin-right: auto; /* 中央寄せのための右マージン */
         }
         .user-container {
             position: relative;
@@ -91,6 +92,27 @@
             bottom: 0;
             background-color: #D7263D;
         }
-
+        .image-container img {
+            width: 60%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            object-fit: cover; /* 画像のアスペクト比を保ちながらサイズを調整 */
+        }
+        .btn-new-post {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #D7263D; /* アクセントカラーの赤 */
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+        .btn-new-post:hover {
+            background-color: #B51E32; /* ホバー時に少し暗くする */
+        }
     </style>
 </x-app-layout>
