@@ -12,57 +12,60 @@
 
     @foreach ($blogs as $blog)
     <div class="post p-4 my-4 bg-car-light-gray rounded shadow space-y-4">
-        <!-- 投稿内容 -->
-        <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
-            <div class="user-content flex items-center relative z-10" style="padding: 10px;">
-                <img src="{{$blog->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
-                <span class="user-name">{{$blog->user->name}}</span>
+        <a href="{{route('blog.show', ['blog' => $blog->id])}}">
+            <!-- 投稿内容 -->
+            <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
+                <div class="user-content flex items-center relative z-10" style="padding: 10px;">
+                    <img src="{{$blog->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
+                    <span class="user-name">{{$blog->user->name}}</span>
+                </div>
+                <div class="user-background absolute inset-0 bg-user-icon"></div>
             </div>
-            <div class="user-background absolute inset-0 bg-user-icon"></div>
-        </div>
-
-        <p class="body text-black mb-2">{{$blog->body}}</p>
-        <!-- blog本文 -->
-        <div class="image-container flex justify-center">
-            <img src="{{$blog->photo}}" class="common-image rounded">
-        </div>
-
-        <div class="flex justify-between items-center mt-2">
-            <div class="flex space-x-4 items-center">
-                <div class="count-display">💬{{ $blog->blogComments ? $blog->blogComments->count() : 0 }}</div>
-                <!-- コメント数 -->
-                <div class="count-display">❤{{ $blog->likes ? $blog->likes->count() : 0 }}</div>
-                <!-- いいね数 -->
+        
+            <p class="body text-black mb-2">{{$blog->body}}</p>
+            <!-- blog本文 -->
+            <div class="image-container flex justify-center">
+                <img src="{{$blog->photo}}" class="common-image rounded">
             </div>
-            <div class="flex space-x-4 items-center">
-                <a href="{{route('blog.comment', ['blog' => $blog->id])}}" class="btn-action">Comment</a>
-                <!-- コメント画面へ遷移 -->
-
-                <!-- フォームをリンクの外に移動 -->
-                <form action="{{ route('blog.good', ['blog' => $blog->id]) }}" method="POST" class="inline-block">
-                    <!-- いいねボタン -->
-                    @csrf
-                    <button type="submit" class="btn-action">いいね</button>
-                </form>
+        
+            <div class="flex justify-between items-center mt-2">
+                <div class="flex space-x-4 items-center">
+                    <div class="count-display">💬{{ $blog->blogComments ? $blog->blogComments->count() : 0 }}</div>
+                    <!-- コメント数 -->
+                    <div class="count-display">❤{{ $blog->likes ? $blog->likes->count() : 0 }}</div>
+                    <!-- いいね数 -->
+                </div>
+                <div class="flex space-x-4 items-center">
+                    <a href="{{route('blog.comment', ['blog' => $blog->id])}}" class="btn-action">Comment</a>
+                    <!-- コメント画面へ遷移 -->
+        
+                    <!-- フォームをリンクの外に移動 -->
+                    <form action="{{ route('blog.good', ['blog' => $blog->id]) }}" method="POST" class="inline-block">
+                        <!-- いいねボタン -->
+                        @csrf
+                        <button type="submit" class="btn-action">いいね</button>
+                    </form>
+                </div>
             </div>
-        </div>
+            
+            <!-- 境界線の追加 -->
+            <hr class="comment-divider">
 
-        @if (isset($blog->blogComment) && count($blog->blogComment) > 0)
-        <div class="user-container relative mt-4 p-2 rounded" style="display: inline-block;">
-            <div class="user-content flex items-center relative z-10" style="padding: 10px;">
-                <!-- コメントユーザー名&アイコン -->
-                <img src="{{$last_comments[$blog->id]->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
-                <span class="user-name">{{$last_comments[$blog->id]->user->name}}</span>
-                <p class="body text-black ml-2">{{$last_comments[$blog->id]->comment}}</p>
+            @if (isset($blog->blogComments) && count($blog->blogComments) > 0)
+                <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
+                    <div class="user-content flex items-center relative z-10" style="padding: 10px;">
+                        <img src="{{$blog->blogComments->last()->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
+                        <span class="user-name">{{$blog->blogComments->last()->user->name}}</span>
+                    </div>
+                    <div class="user-background absolute inset-0 bg-user-icon"></div>
+                </div>
+        
+                <p class="body text-black mb-2">{{$blog->blogComments->last()->comment}}</p>
                 <!-- コメント本文 -->
-            </div>
-            <div class="user-background absolute inset-0 bg-user-icon"></div>
-        </div>
-        @else
-        <div class="no_comments text-black mt-4">
-            コメントはまだありません
-        </div>
-        @endif
+            @else
+                <div class="no_comments text-black mt-4">コメントはまだありません</div>
+            @endif
+        </a>
     </div>
     @endforeach
     
@@ -216,6 +219,22 @@
             text-align: center;
             margin: 5px;
             transition: background-color 0.3s ease;
+        }
+
+        .comment-divider {
+            margin: 15px 0;
+            border-top: 1px solid #cccccc;
+            /* コメント区切りの薄い線 */
+        }
+
+        .no_comments {
+            color: #999999;
+            /* 薄いグレーで未コメントを表示 */
+            font-style: italic;
+            /* イタリックで強調 */
+            text-align: center;
+            /* 中央揃え */
+            margin-top: 10px;
         }
     </style>
 </x-app-layout>
