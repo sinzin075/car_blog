@@ -62,6 +62,9 @@ class User extends Authenticatable
     public function Event(){
         return $this -> hasMany(Event::class);
     }
+    public function EventComment(){
+        return $this -> hasMany(EventComment::class);
+    }
     
     public function likes()
     {

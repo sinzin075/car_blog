@@ -10,7 +10,11 @@ class EventComment extends Model
     use HasFactory;
     protected $table = 'event_comment';
     
-    public function Event (){
+    public function Event(){
     return $this->belongsTo(Event::class);
+    }
+    
+    public function User(){
+        return $this->belongsTo(User::class);
     }
 }
