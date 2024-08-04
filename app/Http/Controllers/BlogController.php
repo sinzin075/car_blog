@@ -92,7 +92,7 @@ class BlogController extends Controller
         $Event->save();
 
         // ここではデータをそのままビューに渡す
-        return redirect()->route('blog.event')->with('success', 'Event post created successfully!');
+        return redirect()->route('event.event')->with('success', 'Event post created successfully!');
     }
 
     public function Eventshow($id) // 投稿内容の詳細ページ
@@ -204,8 +204,10 @@ class BlogController extends Controller
     public function status($userId) // 定義完了
     {
         $user = User::findOrFail($userId); // 特定のユーザーを取得する
-        $followersCount = $user->follows()->count(); // フォロワー数とフォロー数を取得する
+        $followersCount = $user->followers()->count(); // フォロワー数とフォロー数を取得する
         $followingsCount = $user->follows()->count();
+        
+        $follow = Follow::where('followed_id', Auth::id())->where('follower_id', $userId)->first();
 
         $blogs = Blog::where('user_id', $userId)->get(); // 特定のユーザーのblogデータを取得する
         $blogIds = $blogs->pluck('id'); // 特定のユーザーのidのみを取得する
@@ -235,6 +237,7 @@ class BlogController extends Controller
             'user' => $user,
             'followersCount' => $followersCount,
             'followingsCount' => $followingsCount,
+            'follow' =>$follow,
             'blogs' => $blogs,
             'blog_comments' => $blog_comments,
             'cars' => $cars,
@@ -423,6 +426,30 @@ class BlogController extends Controller
         }
         return redirect()->back();
     }
+    
+    public function follower(Request $request)
+    {
+        $user = Auth::id();
+        $follower = $request->input('userId');
+    
+        // デバッグ用ログ
+        \Log::info('UserId: ' . $follower);
+    
+        // レコード内にお互いのidが存在するか確認
+        $follow = Follow::where('followed_id', $user)->where('follower_id', $follower)->first();
+    
+        if ($follow) { // followの関係がある場合は削除
+            $follow->delete();
+        } else { // followの関係がない場合は作成
+            Follow::create([
+                'followed_id' => $user,
+                'follower_id' => $follower,
+            ]);
+        }
+        return redirect()->back();
+    }
+
+    
     
     public function destroy($id)
     {

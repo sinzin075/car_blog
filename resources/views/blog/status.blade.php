@@ -15,6 +15,25 @@
             <span class="text-center">フォロー：{{ $followersCount }}</span>
             <span class="text-center">フォロワー：{{ $followingsCount }}</span>
         </div>
+      <div>
+        @if(Auth::check() && Auth::user()->id != $user->id)
+            @if($follow == null)
+                <form action="{{ route('follower',['userId'=>$user->id]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="userId" value="{{ $user->id }}">
+                    <button type="submit" class="follow-button">フォローする</button>
+                </form>
+            @else
+                <form action="{{ route('follower',['userId'=>$user->id]) }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="userId" value="{{ $user->id }}">
+                    <button type="submit" class="unfollow-button">フォロー解除</button>
+                </form>
+            @endif
+        @endif
+    </div>
+
+
         <div class="user_car mb-4">
             <ul class="flex justify-between mt-4">
                 @if (isset($user->car1_id))
@@ -109,6 +128,22 @@
         </a>
     </div>
     @endforeach
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // ページロード時にスクロール位置を復元
+            const scrollPosition = localStorage.getItem('scrollPosition');
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition, 10));
+                localStorage.removeItem('scrollPosition');
+            }
+
+            // ページ離脱時にスクロール位置を保存
+            window.addEventListener('beforeunload', function() {
+                localStorage.setItem('scrollPosition', window.scrollY);
+            });
+        });
+    </script>
 
     <style>
         .bg-car-light-gray {
@@ -303,5 +338,50 @@
             border-top: 1px solid #cccccc;
             /* コメント区切りの薄い線 */
         }
+        
+        /* フォローボタンのスタイル */
+        .follow-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #1DA1F2;
+            /* Twitterブルーに近い色 */
+            color: #ffffff;
+            font-weight: bold;
+            border-radius: 5px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+            margin: 5px 0;
+        }
+        
+        .follow-button:hover {
+            background-color: #0d8de0;
+            /* ホバー時に少し暗くする */
+        }
+        
+        .unfollow-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #ff4444;
+            /* 赤色で目立たせる */
+            color: #ffffff;
+            font-weight: bold;
+            border-radius: 5px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+            margin: 5px 0;
+        }
+        
+        .unfollow-button:hover {
+            background-color: #cc3333;
+            /* ホバー時に少し暗くする */
+        }
+
+        
     </style>
 </x-app-layout>

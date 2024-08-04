@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/status/change/mycar/save',[BlogController::class,'carSave'])->name('carSave');
     Route::post('/status/change/mycar/photo/save',[BlogController::class,'userCarPhoto'])->name('userCarPhoto');
     Route::get('/status/change/mycar/{userId}',[BlogController::class, 'carChoice'])->name('carChoice');
-    
+    Route::post('/status/chnge/myfollower/follow/{userId}',[BlogController::class,'follower'])->name('follower');  
     
 });
 
