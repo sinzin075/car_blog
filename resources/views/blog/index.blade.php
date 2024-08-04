@@ -12,16 +12,17 @@
 
     @foreach ($blogs as $blog)
     <div class="post p-4 my-4 bg-car-light-gray rounded shadow space-y-4">
-        <a href="{{route('blog.show', ['blog' => $blog->id])}}">
-            <!-- 投稿内容 -->
-            <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
+        <!-- 投稿内容 -->
+        <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
+            <a href="{{route('status',['userId'=>$blog->user->id])}}">
                 <div class="user-content flex items-center relative z-10" style="padding: 10px;">
                     <img src="{{$blog->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
                     <span class="user-name">{{$blog->user->name}}</span>
                 </div>
                 <div class="user-background absolute inset-0 bg-user-icon"></div>
-            </div>
-        
+            </a>
+        </div>
+        <a href="{{route('blog.show', ['blog' => $blog->id])}}">
             <p class="body text-black mb-2">{{$blog->body}}</p>
             <!-- blog本文 -->
             <div class="image-container flex justify-center">
@@ -36,7 +37,7 @@
                     <!-- いいね数 -->
                 </div>
                 <div class="flex space-x-4 items-center">
-                    <a href="{{route('blog.comment', ['blog' => $blog->id])}}" class="btn-action">Comment</a>
+                    <a href="{{route('blog.comment', ['blog' => $blog->id])}}" class="btn-action">コメント</a>
                     <!-- コメント画面へ遷移 -->
         
                     <!-- フォームをリンクの外に移動 -->
@@ -53,11 +54,13 @@
 
             @if (isset($blog->blogComments) && count($blog->blogComments) > 0)
                 <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
-                    <div class="user-content flex items-center relative z-10" style="padding: 10px;">
-                        <img src="{{$blog->blogComments->last()->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
-                        <span class="user-name">{{$blog->blogComments->last()->user->name}}</span>
-                    </div>
-                    <div class="user-background absolute inset-0 bg-user-icon"></div>
+                    <a href="{{route('status',['userId'=>$blog->blogComments->last()->user->id])}}">
+                        <div class="user-content flex items-center relative z-10" style="padding: 10px;">
+                            <img src="{{$blog->blogComments->last()->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
+                            <span class="user-name">{{$blog->blogComments->last()->user->name}}</span>
+                        </div>
+                        <div class="user-background absolute inset-0 bg-user-icon"></div>
+                    </a>    
                 </div>
         
                 <p class="body text-black mb-2">{{$blog->blogComments->last()->comment}}</p>

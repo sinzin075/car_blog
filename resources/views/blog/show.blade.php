@@ -1,21 +1,27 @@
 <x-app-layout>
-
     <!-- 削除ボタンの表示 -->
     @if (Auth::check() && Auth::user()->id == $blog->user_id)
-        <form action="{{ route('blog.destroy', $blog->id) }}" method="POST" onsubmit="return confirm('本当にこの投稿を削除してもよろしいですか？');" class="text-right">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger">削除</button>
-        </form>
+    <form action="{{ route('blog.destroy', $blog->id) }}" method="POST" onsubmit="return confirm('本当にこの投稿を削除してもよろしいですか？');" class="text-right mb-4">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn-delete">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="inline-block w-6 h-6 mr-2">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            投稿を削除
+        </button>
+    </form>
     @endif
 
     <div class="post p-4 mt-4 bg-car-light-gray rounded shadow space-y-4">
         <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
-            <div class="user-content flex items-center relative z-10" style="padding: 10px;">
-                <img src="{{$blog->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
-                <span class="user-name">{{$blog->user->name}}</span>
-            </div>
-            <div class="user-background absolute inset-0 bg-user-icon"></div>
+            <a href="{{route('status',['userId'=>$blog->user->id])}}">
+                <div class="user-content flex items-center relative z-10" style="padding: 10px;">
+                    <img src="{{$blog->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
+                    <span class="user-name">{{$blog->user->name}}</span>
+                </div>
+                <div class="user-background absolute inset-0 bg-user-icon"></div>
+            </a>
         </div>
 
         <p class="body text-black mb-2">{{$blog->body}}</p><!-- blog本文 -->
@@ -29,7 +35,7 @@
                 <div class="count-display">❤{{$like_count[$blog->id]}}</div><!-- いいね数 -->
             </div>
             <div class="flex space-x-4 items-center">
-                <a href="{{route('blog.comment', ['blog' => $blog->id])}}" class="btn-action">Comment</a><!-- コメント画面へ遷移 -->
+                <a href="{{route('blog.comment', ['blog' => $blog->id])}}" class="btn-action">コメント</a><!-- コメント画面へ遷移 -->
                 <form action="{{route('blog.good', ['blog' => $blog->id])}}" method="POST" enctype="multipart/form-data" class="inline-block"><!-- いいねボタン -->
                     @csrf
                     <button type="submit" class="btn-action">いいね</button>
@@ -40,19 +46,21 @@
         <hr class="comment-divider"><!-- コメントと本文の境界線 -->
 
         @if (isset($blog->blogComments) && count($blog->blogComments) > 0)
-            @foreach ($blog->blogComments as $comment)
-                <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
-                    <div class="user-content flex items-center relative z-10" style="padding: 10px;">
-                        <img src="{{$comment->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
-                        <span class="user-name">{{$comment->user->name}}</span>
-                    </div>
-                    <div class="user-background absolute inset-0 bg-user-icon"></div>
+        @foreach ($blog->blogComments as $comment)
+        <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
+            <a href="{{route('status',['userId'=>$comment->user->id])}}">
+                <div class="user-content flex items-center relative z-10" style="padding: 10px;">
+                    <img src="{{$comment->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
+                    <span class="user-name">{{$comment->user->name}}</span>
                 </div>
+                <div class="user-background absolute inset-0 bg-user-icon"></div>
+            </a>
+        </div>
 
-                <p class="body text-black mb-2">{{$comment->comment}}</p><!-- コメント本文 -->
-            @endforeach
+        <p class="body text-black mb-2">{{$comment->comment}}</p><!-- コメント本文 -->
+        @endforeach
         @else
-            <div class="no_comments text-black mt-4">コメントはまだありません</div>
+        <div class="no_comments text-black mt-4">コメントはまだありません</div>
         @endif
     </div>
 
@@ -190,6 +198,30 @@
             text-align: center;
             margin: 5px;
             transition: background-color 0.3s ease;
+        }
+
+        .btn-delete {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #D7263D;
+            /* 赤色で強調 */
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            /* 影を追加して目立たせる */
+        }
+
+        .btn-delete:hover {
+            background-color: #B51E32;
+            /* ホバー時に少し暗くする */
+            transform: translateY(-2px);
+            /* ホバー時に少し上に移動 */
         }
 
         .comment-divider {

@@ -115,7 +115,7 @@ class BlogController extends Controller
         ]);
     }
 
-    public function EventCommentUpload(Request $request)// postから送信されたフォームの保存
+    public function EventCommentUpload(Request $request): RedirectResponse // postから送信されたフォームの保存
     {
         // バリデーション
         $this->validate($request, [
