@@ -190,12 +190,13 @@
         }
 
         .map-container {
+            width: 100%; /* 必要に応じて変更 */
             height: 500px;
-            width: 60%;
             margin: 20px auto;
             position: relative;
             z-index: 1;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden; /* 余分なコンテンツを隠す */
+            background-color: #e0e0e0; /* デフォルトの背景色を指定 */
         }
 
         .flex {
