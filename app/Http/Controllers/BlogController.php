@@ -17,7 +17,8 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Intervention\Image\Facades\Image; 
+use Intervention\Image\Laravel\Facades\Image; 
+
 
 class BlogController extends Controller
 {
@@ -155,24 +156,55 @@ class BlogController extends Controller
         return view('blog.post')->with('user', $user);
     }
 
-    public function upload(Request $request) // postから送信されたフォームの保存
+    
+    
+    
+    public function upload(Request $request)
     {
-        // バリデーション
-        $this->validate($request, [
-            'body' => 'required|string|max:300',
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+        // ファイルの初期バリデーション
+        $request->validate([
+            'photo' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            'body' => 'required|string|max:300', // blogのbodyに対するバリデーション
         ]);
-        // 画像のアップロード
-        $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
-        // データベースに保存
-        $blog = new Blog;
-        $blog->user_id = Auth::id(); // ログインユーザーのIDを設定
-        $blog->body = $request->body;
-        $blog->photo = $uploadedFileUrl;
-        $blog->save();
-
-        return redirect()->route('index')->with('success', 'Blog post created successfully!');
+    
+        try {
+            // 画像を読み込む
+            $image = Image::make($request->file('photo')->getRealPath());
+    
+            // 画像のリサイズ
+            $image->resize(1024, 1024, function ($constraint) {
+                $constraint->aspectRatio();  // アスペクト比を維持
+                $constraint->upsize();       // 元のサイズよりも大きくしない
+            });
+    
+            // 一時ファイルにリサイズされた画像を保存
+            $tempPath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
+            $image->save($tempPath, 75); // 75はJPEGの圧縮率
+    
+            // Cloudinaryにリサイズされた画像をアップロード
+            $uploadedFileUrl = Cloudinary::upload($image->getRealPath())->getSecurePath();
+    
+            // データベースに保存
+            $blog = new Blog;
+            $blog->user_id = Auth::id(); // ログインユーザーのIDを設定
+            $blog->body = $request->body; // リクエストからbodyを取得
+            $blog->photo = $uploadedFileUrl; // CloudinaryからのURLを保存
+            $blog->save();
+    
+            // 一時ファイルを削除
+            unlink($tempPath);
+    
+            return redirect()->route('index')->with('success', 'Blog post created successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed: ' . json_encode($e->errors()));
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Image processing failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', '画像処理に失敗しました。');
+        }
     }
+    
+
 
     public function comment($id) // 投稿に対するコメント
     {
@@ -206,28 +238,12 @@ class BlogController extends Controller
         $user = User::findOrFail($userId); // 特定のユーザーを取得する
         $followersCount = $user->followers()->count(); // フォロワー数とフォロー数を取得する
         $followingsCount = $user->follows()->count();
-        
         $follow = Follow::where('followed_id', Auth::id())->where('follower_id', $userId)->first();
 
-        $blogs = Blog::where('user_id', $userId)->get(); // 特定のユーザーのblogデータを取得する
+        $blogs = Blog::where('user_id', $userId)->with(['user', 'blogComments', 'likes'])->orderBy('created_at', 'desc')->get(); // 特定のユーザーのblogデータを取得する
         $blogIds = $blogs->pluck('id'); // 特定のユーザーのidのみを取得する
         $blog_comments = BlogComment::whereIn('blog_id', $blogIds)->get(); // 取得したidが保存されているblog_commentのレコードを取得する
-
-        $like_count = [];
-        $comment_count = [];
-        $last_comments = [];
-
-        foreach ($blogs as $single_blog) {
-            // いいねの数をカウント
-            $like_count[$single_blog->id] = $single_blog->likes->count();
-
-            // コメントの数をカウント
-            $comment_count[$single_blog->id] = $single_blog->blogComments->count();
-
-            // 最新のコメントを取得
-            $last_comments[$single_blog->id] = $single_blog->blogComments->sortByDesc('created_at')->first();
-        }
-
+        
         // ユーザーのcar_idを取得する
         $carIds = [$user->car1_id, $user->car2_id, $user->car3_id];
 
@@ -241,9 +257,6 @@ class BlogController extends Controller
             'blogs' => $blogs,
             'blog_comments' => $blog_comments,
             'cars' => $cars,
-            'comment_count' => $comment_count,
-            'like_count' => $like_count,
-            'last_comments' => $last_comments
         ]);
     }
 

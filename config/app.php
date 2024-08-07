@@ -159,14 +159,13 @@ return [
     /*
      * Package Service Providers...
      */
-    Intervention\Image\ImageServiceProvider::class, // ここを確認
+    //Intervention\Image\ImageServiceProvider::class,
 
     /*
      * Application Service Providers...
      */
     App\Providers\AppServiceProvider::class,
     App\Providers\AuthServiceProvider::class,
-    // App\Providers\BroadcastServiceProvider::class,
     App\Providers\EventServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
 ])->toArray(),
@@ -183,7 +182,6 @@ return [
     |
     */
 'aliases' => Facade::defaultAliases()->merge([
-    'Image' => Intervention\Image\Facades\Image::class, 
 ])->toArray(),
 
 

@@ -98,8 +98,10 @@
 
             <div class="flex justify-between items-center mt-2">
                 <div class="flex space-x-4 items-center">
-                    <div class="count-display comment_count">💬 {{ $comment_count[$blog->id] }}</div>
-                    <div class="count-display good">❤ {{ $like_count[$blog->id] }}</div>
+                   <div class="count-display">💬{{ $blog->blogComments ? $blog->blogComments->count() : 0 }}</div>
+                    <!-- コメント数 -->
+                    <div class="count-display">❤{{ $blog->likes ? $blog->likes->count() : 0 }}</div>
+                    <!-- いいね数 -->
                 </div>
                 <div class="flex space-x-4 items-center">
                     <a href="{{ route('blog.comment', ['blog' => $blog->id]) }}" class="btn-action">コメント</a>
@@ -113,17 +115,21 @@
             <hr class="comment-divider">
             <!-- コメントと本文の境界線 -->
 
-            @if (isset($blog->blogComments) && count($blog->blogComments) > 0)
-            <div class="user-container relative mt-4 p-2 rounded flex items-center">
-                <div class="user-content flex items-center relative z-10" style="padding: 10px;">
-                    <img src="{{$last_comments[$blog->id]->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
-                    <span class="user-name">{{$last_comments[$blog->id]->user->name}}</span>
+           @if (isset($blog->blogComments) && count($blog->blogComments) > 0)
+                <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
+                    <a href="{{route('status',['userId'=>$blog->blogComments->last()->user->id])}}">
+                        <div class="user-content flex items-center relative z-10" style="padding: 10px;">
+                            <img src="{{$blog->blogComments->last()->user->photo}}" alt="user_icon" class="w-9 h-9 rounded-full mr-2">
+                            <span class="user-name">{{$blog->blogComments->last()->user->name}}</span>
+                        </div>
+                        <div class="user-background absolute inset-0 bg-user-icon"></div>
+                    </a>    
                 </div>
-                <div class="user-background absolute inset-0 bg-user-icon"></div>
-            </div>
-            <p class="body text-black ml-2">{{ $last_comments[$blog->id]->comment }}</p>
+        
+                <p class="body text-black mb-2">{{$blog->blogComments->last()->comment}}</p>
+                <!-- コメント本文 -->
             @else
-            <div class="no_comments text-black mt-4">コメントはまだありません</div>
+                <div class="no_comments text-black mt-4">コメントはまだありません</div>
             @endif
         </a>
     </div>
