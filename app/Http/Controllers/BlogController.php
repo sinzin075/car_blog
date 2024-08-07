@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Laravel\Facades\Image; 
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 
 class BlogController extends Controller
@@ -161,38 +163,53 @@ class BlogController extends Controller
     
     public function upload(Request $request)
     {
-        // ファイルの初期バリデーション
+        // ファイルのバリデーション
         $request->validate([
             'photo' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:10240',
-            'body' => 'required|string|max:300', // blogのbodyに対するバリデーション
+            'body' => 'required|string|max:300',
         ]);
     
         try {
-            // 画像を読み込む
-            $image = Image::make($request->file('photo')->getRealPath());
+            // ステップ1: ImageManagerのインスタンス作成 (GDドライバを使用)
+            \Log::info('Creating ImageManager instance...');
+            $manager = new ImageManager(new Driver());
+            \Log::info('ImageManager instance created.');
     
-            // 画像のリサイズ
+            // ステップ2: 画像を読み込む
+            \Log::info('Reading image from request...');
+            $image = $manager->make($request->file('photo')->getRealPath());
+            \Log::info('Image read successfully.');
+    
+            // ステップ3: 画像のリサイズ
+            \Log::info('Resizing image...');
             $image->resize(1024, 1024, function ($constraint) {
                 $constraint->aspectRatio();  // アスペクト比を維持
                 $constraint->upsize();       // 元のサイズよりも大きくしない
             });
+            \Log::info('Image resized successfully.');
     
-            // 一時ファイルにリサイズされた画像を保存
+            // ステップ4: 一時ファイルにリサイズされた画像を保存
             $tempPath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
-            $image->save($tempPath, 75); // 75はJPEGの圧縮率
+            \Log::info("Saving resized image to temporary file: $tempPath");
+            $image->save($tempPath, 75); // 75はJPEGの品質（可変）
+            \Log::info('Image saved to temporary file.');
     
-            // Cloudinaryにリサイズされた画像をアップロード
-            $uploadedFileUrl = Cloudinary::upload($image->getRealPath())->getSecurePath();
+            // ステップ5: リサイズされた画像をCloudinaryにアップロード
+            \Log::info('Uploading image to Cloudinary...');
+            $uploadedFileUrl = Cloudinary::upload($tempPath)->getSecurePath();
+            \Log::info("Image uploaded to Cloudinary: $uploadedFileUrl");
     
-            // データベースに保存
+            // ステップ6: データベースに保存
             $blog = new Blog;
             $blog->user_id = Auth::id(); // ログインユーザーのIDを設定
-            $blog->body = $request->body; // リクエストからbodyを取得
-            $blog->photo = $uploadedFileUrl; // CloudinaryからのURLを保存
+            $blog->body = $request->body;
+            $blog->photo = $uploadedFileUrl;
             $blog->save();
+            \Log::info('Blog post saved to database.');
     
             // 一時ファイルを削除
             unlink($tempPath);
+            \Log::info('Temporary file deleted.');
     
             return redirect()->route('index')->with('success', 'Blog post created successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {

@@ -12,20 +12,16 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    
                     <x-nav-link :href="route('index')" :active="request()->routeIs('index')">
-                        {{ __('index') }}
+                        {{'投稿一覧'}}
                     </x-nav-link>
                     
                     <x-nav-link :href="route('status',Auth::id())" :active="request()->routeIs('status')">
-                        {{ __('status') }}
+                        {{'ユーザー情報'}}
                     </x-nav-link>
                     
                     <x-nav-link :href="route('event.event')" :active="request()->routeIs('event.event')">
-                        {{ __('event') }}
+                        {{'イベント情報'}}
                     </x-nav-link>
                 </div>
             </div>
