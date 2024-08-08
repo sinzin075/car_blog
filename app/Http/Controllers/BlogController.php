@@ -17,18 +17,16 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Intervention\Image\Laravel\Facades\Image; 
+use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 
-
 class BlogController extends Controller
 {
-    public function index(User $user, Blog $blog, BlogComment $blog_comment) // index画面設定
+    public function index(User $user, Blog $blog, BlogComment $blog_comment)
     {
         $users = $user->get();
         $blogs = $blog->with(['user', 'blogComments', 'likes'])->orderBy('created_at', 'desc')->get();
-        
 
         return view('blog.index')->with([
             'users' => $users,
@@ -36,17 +34,18 @@ class BlogController extends Controller
         ]);
     }
 
-    public function event(User $user,Event $event,EventComment $event_comment,){//index画面設定
+    public function event(User $user, Event $event, EventComment $event_comment)
+    {
         $users = $user->get();
-        $events = $event->with(['user','EventComment','Event_likes'])->orderBy('created_at','desc')->get();
-        
+        $events = $event->with(['user', 'EventComment', 'Event_likes'])->orderBy('created_at', 'desc')->get();
+
         return view('blog.event')->with([
-            'users'=>$users,
-            'events'=>$events,
-            ]);
+            'users' => $users,
+            'events' => $events,
+        ]);
     }
 
-    public function EventPost() // 新しい投稿ページ用
+    public function EventPost()
     {
         $user = Auth::user();
         return view('blog.EventPost')->with('user', $user);
@@ -58,47 +57,77 @@ class BlogController extends Controller
             'title' => 'required|string|max:35',
             'body' => 'required|string|max:300',
             'address' => 'required|string',
+            'photo' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:10240',
         ]);
+        try {
+            $manager = new ImageManager(new Driver());
+    
+            $image = $manager->read($request->file('photo'));
+        
+                // 画像の幅と高さを取得
+            $originalWidth = $image->width();
+            $originalHeight = $image->height();
+    
+            // 横の最大幅に合わせてアスペクト比を保ったままリサイズする高さを計算
+            $maxWidth = 750;
+            $newHeight = intval(($originalHeight / $originalWidth) * $maxWidth);
+    
+            // 画像をリサイズ
+            $image->resize($maxWidth, $newHeight, function ($constraint) {
+                $constraint->aspectRatio(); // アスペクト比を保つ
+                $constraint->upsize();      // 元のサイズより大きくしない
+            });
+    
+            // 一時ファイルに保存
+            $tempPath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
+            $image->save($tempPath, 75);
+    
+            // 画像をCloudinaryにアップロード
+            $uploadedFileUrl = Cloudinary::upload($tempPath)->getSecurePath();
+        
+    
+            $user = Auth::id();
+            $address = $request->input('address');//google map用住所
+            $endpoint = 'https://maps.googleapis.com/maps/api/geocode/json';
+            $apiKey = config('services.google_maps.api_key');
+            $response = Http::get($endpoint, [
+                'address' => $address,
+                'key' => $apiKey,
+            ]);
+            $locationData = $response->json();
+    
+            if (isset($locationData['results'][0])) {
+                $firstResult = $locationData['results'][0];
+            }
+    
+            $geometry = $firstResult['geometry'];
+            $lat = $geometry['location']['lat'];
+            $lng = $geometry['location']['lng'];
+    
+            $Event = new Event;
+            $Event->user_id = $user;
+            $Event->title = $request->title;
+            $Event->body = $request->body;
+            $Event->photo = $uploadedFileUrl;
+            $Event->address = $address;
+            $Event->lat = $lat;
+            $Event->lng = $lng;
+            $Event->save();
 
-        $user = Auth::id();
-        // 画像をCloudinaryに保存しURLを作成
-        $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
-
-        $address = $request->input('address');
-        // Google Maps APIのエンドポイントとAPIキー
-        $endpoint = 'https://maps.googleapis.com/maps/api/geocode/json';
-        $apiKey = config('services.google_maps.api_key'); // 自分のAPIキーに置き換える
-        // Google Maps APIリクエストの送信
-        $response = Http::get($endpoint, [
-            'address' => $address,
-            'key' => $apiKey,
-        ]);
-        // レスポンスの取得
-        $locationData = $response->json(); // 受け取り方が配列になってしますため、カラムの増設をしてデータを文字列に変更する
-
-        if (isset($locationData['results'][0])) {
-            $firstResult = $locationData['results'][0];
+                // 一時ファイルを削除
+            unlink($tempPath);
+    
+            return redirect()->route('event.event')->with('success', 'Blog post created successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '画像処理に失敗しました。');
         }
 
-        $geometry = $firstResult['geometry'];
-        $lat = $geometry['location']['lat'];
-        $lng = $geometry['location']['lng'];
-
-        $Event = new Event;
-        $Event->user_id = $user;
-        $Event->title = $request->title;
-        $Event->body = $request->body;
-        $Event->photo = $uploadedFileUrl;
-        $Event->address = $address;
-        $Event->lat = $lat;
-        $Event->lng = $lng;
-        $Event->save();
-
-        // ここではデータをそのままビューに渡す
         return redirect()->route('event.event')->with('success', 'Event post created successfully!');
     }
 
-    public function Eventshow($id) // 投稿内容の詳細ページ
+    public function Eventshow($id)
     {
         $event = Event::with(['user', 'eventComment', 'Event_likes'])->findOrFail($id);
 
@@ -107,26 +136,25 @@ class BlogController extends Controller
         ]);
     }
 
-    public function EventComment($id) // 投稿に対するコメント
+    public function EventComment($id)
     {
-        $event = Event::with('user')->findOrFail($id); // 投稿と投稿ユーザー情報
-        $commentUser = Auth::user(); // ログインユーザー(コメントする人)
+        $event = Event::with('user')->findOrFail($id);
+        $commentUser = Auth::user();
 
         return view('blog.EventComment')->with([
             'event' => $event,
-            'commentUser' => $commentUser
+            'commentUser' => $commentUser,
         ]);
     }
 
-    public function EventCommentUpload(Request $request): RedirectResponse // postから送信されたフォームの保存
+    public function EventCommentUpload(Request $request): RedirectResponse
     {
-        // バリデーション
         $this->validate($request, [
             'comment' => 'required|string|max:300'
         ]);
-        // データベースに保存
+
         $event_comment = new EventComment;
-        $event_comment->user_id = Auth::id(); // ログインユーザーのIDを設定
+        $event_comment->user_id = Auth::id();
         $event_comment->event_id = $request->event;
         $event_comment->comment = $request->comment;
         $event_comment->save();
@@ -134,14 +162,14 @@ class BlogController extends Controller
         return redirect()->route('event.event');
     }
 
-    public function show($id) // 投稿内容の詳細ページ
+    public function show($id)
     {
         $blog = Blog::with(['user', 'blogComments', 'likes'])->findOrFail($id);
 
-        $comment_count = []; // blogsテーブルのidを使用して関連するコメントの数を返す
+        $comment_count = [];
         $comment_count[$blog->id] = $blog->blogComments->count();
 
-        $like_count = []; // blogsテーブルのidを使用して関連するコメントの数を返す
+        $like_count = [];
         $like_count[$blog->id] = $blog->likes->count();
 
         return view('blog.show')->with([
@@ -151,98 +179,82 @@ class BlogController extends Controller
         ]);
     }
 
-    // 保存の際の画像サイズ要検討
-    public function post() // 新しい投稿ページ用
+    public function post()
     {
         $user = Auth::user();
         return view('blog.post')->with('user', $user);
     }
 
-    
-    
-    
     public function upload(Request $request)
     {
-        // ファイルのバリデーション
         $request->validate([
             'photo' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:10240',
             'body' => 'required|string|max:300',
         ]);
     
         try {
-            // ステップ1: ImageManagerのインスタンス作成 (GDドライバを使用)
-            \Log::info('Creating ImageManager instance...');
             $manager = new ImageManager(new Driver());
-            \Log::info('ImageManager instance created.');
     
-            // ステップ2: 画像を読み込む
-            \Log::info('Reading image from request...');
-            $image = $manager->make($request->file('photo')->getRealPath());
-            \Log::info('Image read successfully.');
+            $image = $manager->read($request->file('photo'));
+        
+                // 画像の幅と高さを取得
+            $originalWidth = $image->width();
+            $originalHeight = $image->height();
     
-            // ステップ3: 画像のリサイズ
-            \Log::info('Resizing image...');
-            $image->resize(1024, 1024, function ($constraint) {
-                $constraint->aspectRatio();  // アスペクト比を維持
-                $constraint->upsize();       // 元のサイズよりも大きくしない
+            // 横の最大幅に合わせてアスペクト比を保ったままリサイズする高さを計算
+            $maxWidth = 750;
+            $newHeight = intval(($originalHeight / $originalWidth) * $maxWidth);
+    
+            // 画像をリサイズ
+            $image->resize($maxWidth, $newHeight, function ($constraint) {
+                $constraint->aspectRatio(); // アスペクト比を保つ
+                $constraint->upsize();      // 元のサイズより大きくしない
             });
-            \Log::info('Image resized successfully.');
     
-            // ステップ4: 一時ファイルにリサイズされた画像を保存
+            // 一時ファイルに保存
             $tempPath = sys_get_temp_dir() . '/' . uniqid() . '.jpg';
-            \Log::info("Saving resized image to temporary file: $tempPath");
-            $image->save($tempPath, 75); // 75はJPEGの品質（可変）
-            \Log::info('Image saved to temporary file.');
+            $image->save($tempPath, 75);
     
-            // ステップ5: リサイズされた画像をCloudinaryにアップロード
-            \Log::info('Uploading image to Cloudinary...');
+            // 画像をCloudinaryにアップロード
             $uploadedFileUrl = Cloudinary::upload($tempPath)->getSecurePath();
-            \Log::info("Image uploaded to Cloudinary: $uploadedFileUrl");
     
-            // ステップ6: データベースに保存
+            // データベースに保存
             $blog = new Blog;
-            $blog->user_id = Auth::id(); // ログインユーザーのIDを設定
+            $blog->user_id = Auth::id();
             $blog->body = $request->body;
             $blog->photo = $uploadedFileUrl;
             $blog->save();
-            \Log::info('Blog post saved to database.');
     
             // 一時ファイルを削除
             unlink($tempPath);
-            \Log::info('Temporary file deleted.');
     
             return redirect()->route('index')->with('success', 'Blog post created successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed: ' . json_encode($e->errors()));
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            \Log::error('Image processing failed: ' . $e->getMessage());
             return redirect()->back()->with('error', '画像処理に失敗しました。');
         }
     }
-    
 
-
-    public function comment($id) // 投稿に対するコメント
+    public function comment($id)
     {
-        $blog = Blog::with('user')->findOrFail($id); // 投稿と投稿ユーザー情報
-        $commentUser = Auth::user(); // ログインユーザー(コメントする人)
+        $blog = Blog::with('user')->findOrFail($id);
+        $commentUser = Auth::user();
 
         return view('blog.comment')->with([
             'blog' => $blog,
-            'commentUser' => $commentUser
+            'commentUser' => $commentUser,
         ]);
     }
 
-    public function commentUpload(Request $request): RedirectResponse // postから送信されたフォームの保存
+    public function commentUpload(Request $request): RedirectResponse
     {
-        // バリデーション
         $this->validate($request, [
             'comment' => 'required|string|max:300'
         ]);
-        // データベースに保存
+
         $blog_comment = new BlogComment;
-        $blog_comment->user_id = Auth::id(); // ログインユーザーのIDを設定
+        $blog_comment->user_id = Auth::id();
         $blog_comment->blog_id = $request->blog;
         $blog_comment->comment = $request->comment;
         $blog_comment->save();
@@ -250,27 +262,25 @@ class BlogController extends Controller
         return redirect()->route('index');
     }
 
-    public function status($userId) // 定義完了
+    public function status($userId)
     {
-        $user = User::findOrFail($userId); // 特定のユーザーを取得する
-        $followersCount = $user->followers()->count(); // フォロワー数とフォロー数を取得する
+        $user = User::findOrFail($userId);
+        $followersCount = $user->followers()->count();
         $followingsCount = $user->follows()->count();
         $follow = Follow::where('followed_id', Auth::id())->where('follower_id', $userId)->first();
 
-        $blogs = Blog::where('user_id', $userId)->with(['user', 'blogComments', 'likes'])->orderBy('created_at', 'desc')->get(); // 特定のユーザーのblogデータを取得する
-        $blogIds = $blogs->pluck('id'); // 特定のユーザーのidのみを取得する
-        $blog_comments = BlogComment::whereIn('blog_id', $blogIds)->get(); // 取得したidが保存されているblog_commentのレコードを取得する
-        
-        // ユーザーのcar_idを取得する
-        $carIds = [$user->car1_id, $user->car2_id, $user->car3_id];
+        $blogs = Blog::where('user_id', $userId)->with(['user', 'blogComments', 'likes'])->orderBy('created_at', 'desc')->get();
+        $blogIds = $blogs->pluck('id');
+        $blog_comments = BlogComment::whereIn('blog_id', $blogIds)->get();
 
+        $carIds = [$user->car1_id, $user->car2_id, $user->car3_id];
         $cars = Car::whereIn('id', $carIds)->get();
 
         return view('blog.status')->with([
             'user' => $user,
             'followersCount' => $followersCount,
             'followingsCount' => $followingsCount,
-            'follow' =>$follow,
+            'follow' => $follow,
             'blogs' => $blogs,
             'blog_comments' => $blog_comments,
             'cars' => $cars,
@@ -286,21 +296,18 @@ class BlogController extends Controller
 
     public function statusChangeUpload(Request $request)
     {
-        // バリデーション
         $this->validate($request, [
-            'photo' => 'nullable|image|max:2048', // 画像ファイルのバリデーション
+            'photo' => 'nullable|image|max:2048',
             'greeting' => 'nullable|string|max:300',
         ]);
 
-        $user = Auth::user(); // 認証ユーザーの取得
+        $user = Auth::user();
 
-        // 画像のアップロード
         if ($request->hasFile('photo')) {
             $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
-            $user->photo = $uploadedFileUrl; // URLを直接保存
+            $user->photo = $uploadedFileUrl;
         }
 
-        // データベースに保存
         $user->greeting = $request->input('greeting');
         $user->save();
 
@@ -309,18 +316,12 @@ class BlogController extends Controller
 
     public function carChoice(Car $car)
     {
-        // 'id'カラムで昇順に並べ替え
-        $cars = Car::with(['maker.country'])
-            ->orderBy('id', 'asc')
-            ->get()
-            ->groupBy(function ($car) {
-                return $car->maker->country->name;
-            });
+        $cars = Car::with(['maker.country'])->orderBy('id', 'asc')->get()->groupBy(function ($car) {
+            return $car->maker->country->name;
+        });
 
-        // 現在のユーザーを取得
         $user = Auth::user();
 
-        // ユーザーが選択した車を取得、存在しない場合はnullを設定
         $selectedCars = [
             Car::find($user->car1_id),
             Car::find($user->car2_id),
@@ -336,81 +337,64 @@ class BlogController extends Controller
 
     public function carSave(Request $request)
     {
-        // デバッグログ
         \Log::info('carSave request data', $request->all());
 
-        // バリデーション
         $request->validate([
             'car1_id' => 'nullable|exists:cars,id',
             'car2_id' => 'nullable|exists:cars,id',
             'car3_id' => 'nullable|exists:cars,id',
         ]);
 
-        // 現在のユーザーを取得
         $user = Auth::user();
 
-        // フォームから送信された車のIDを取得
         $car1_id = $request->input('car1_id');
         $car2_id = $request->input('car2_id');
         $car3_id = $request->input('car3_id');
 
-        // デバッグログ
         \Log::info('car1_id', ['car1_id' => $car1_id]);
         \Log::info('car2_id', ['car2_id' => $car2_id]);
         \Log::info('car3_id', ['car3_id' => $car3_id]);
 
-        // ユーザーの選択をデータベースに保存
         $user->car1_id = $car1_id;
         $user->car2_id = $car2_id;
         $user->car3_id = $car3_id;
 
-        // 保存前のデバッグログ
         \Log::info('User before save', ['user' => $user]);
 
         $user->save();
 
-        // 保存後のデバッグログ
         \Log::info('User saved', ['user' => $user]);
 
-        // 成功メッセージと共に特定のルートにリダイレクト
         return redirect()->route('profile.edit')->with('success', 'Your car selections have been saved.');
     }
-    
-    
+
     public function userCarPhoto(Request $request)
     {
         Log::info('Request Data:', $request->all());
-        // バリデーション
+
         $request->validate([
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'carPhoto' => 'required|in:car1_photo,car2_photo,car3_photo',
         ]);
 
-        $user = Auth::user(); // ログイン中のユーザーを取得
+        $user = Auth::user();
 
         $carPhoto = $request->input('carPhoto');
 
-        // 画像をCloudinaryにアップロード
         $uploadedFileUrl = Cloudinary::upload($request->file('photo')->getRealPath())->getSecurePath();
 
-        // ユーザーテーブルの指定カラムにURLを設定
-        $user->{$carPhoto} = $uploadedFileUrl; 
-        
-        // データベースに保存
+        $user->{$carPhoto} = $uploadedFileUrl;
+
         $user->save();
 
         return redirect()->back();
     }
-    
+
     public function carList(Car $car)
     {
-        // 'id'カラムで昇順に並べ替え
-        $cars = Car::with(['maker.country'])
-            ->orderBy('id', 'asc')
-            ->get()
-            ->groupBy(function ($car) {
-                return $car->maker->country->name;
-            });
+        $cars = Car::with(['maker.country'])->orderBy('id', 'asc')->get()->groupBy(function ($car) {
+            return $car->maker->country->name;
+        });
 
         return view('blog.carList', ['cars' => $cars]);
     }
@@ -422,16 +406,16 @@ class BlogController extends Controller
         }
     }
 
-    public function good(Request $request) // いいね機能
+    public function good(Request $request)
     {
-        $user = Auth::id(); // ユーザーIDを取得
+        $user = Auth::id();
         $blog = $request->input('blog');
 
         $like = Likes::where('user_id', $user)->where('blog_id', $blog)->first();
 
-        if ($like) { // いいねがすでに存在する場合、削除する
+        if ($like) {
             $like->delete();
-        } else { // いいねが存在しない場合、作成する
+        } else {
             Likes::create([
                 'user_id' => $user,
                 'blog_id' => $blog,
@@ -439,16 +423,17 @@ class BlogController extends Controller
         }
         return redirect()->back();
     }
-    
-    public function EventGood(Request $request){//いいね機能
-        $user = Auth::id(); //ユーザーIDを取得
+
+    public function EventGood(Request $request)
+    {
+        $user = Auth::id();
         $event = $request->input('event');
-    
+
         $like = Event_Likes::where('user_id', $user)->where('event_id', $event)->first();
-    
-        if ($like) {// いいねがすでに存在する場合、削除する
+
+        if ($like) {
             $like->delete();
-        } else {// いいねが存在しない場合、作成する
+        } else {
             Event_Likes::create([
                 'user_id' => $user,
                 'event_id' => $event,
@@ -456,21 +441,19 @@ class BlogController extends Controller
         }
         return redirect()->back();
     }
-    
+
     public function follower(Request $request)
     {
         $user = Auth::id();
         $follower = $request->input('userId');
-    
-        // デバッグ用ログ
+
         \Log::info('UserId: ' . $follower);
-    
-        // レコード内にお互いのidが存在するか確認
+
         $follow = Follow::where('followed_id', $user)->where('follower_id', $follower)->first();
-    
-        if ($follow) { // followの関係がある場合は削除
+
+        if ($follow) {
             $follow->delete();
-        } else { // followの関係がない場合は作成
+        } else {
             Follow::create([
                 'followed_id' => $user,
                 'follower_id' => $follower,
@@ -479,13 +462,10 @@ class BlogController extends Controller
         return redirect()->back();
     }
 
-    
-    
     public function destroy($id)
     {
         $blog = Blog::findOrFail($id);
 
-        // ログインユーザーが投稿者であるかをチェック
         if (Auth::check() && Auth::user()->id == $blog->user_id) {
             $blog->delete();
             return redirect()->route('index')->with('success', '投稿を削除しました！');
@@ -498,7 +478,6 @@ class BlogController extends Controller
     {
         $event = Event::findOrFail($id);
 
-        // ログインユーザーが投稿者であるかをチェック
         if (Auth::check() && Auth::user()->id == $event->user_id) {
             $event->delete();
             return redirect()->route('event.event')->with('success', '投稿を削除しました！');
