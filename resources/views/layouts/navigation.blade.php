@@ -16,13 +16,18 @@
                         {{'投稿一覧'}}
                     </x-nav-link>
                     
+                    <x-nav-link :href="route('event.event')" :active="request()->routeIs('event.event')">
+                        {{'イベント情報'}}
+                    </x-nav-link>
+                    
                     <x-nav-link :href="route('status',Auth::id())" :active="request()->routeIs('status')">
                         {{'ユーザー情報'}}
                     </x-nav-link>
                     
-                    <x-nav-link :href="route('event.event')" :active="request()->routeIs('event.event')">
-                        {{'イベント情報'}}
+                    <x-nav-link :href="route('search')" :active="request()->routeIs('seach')">
+                        {{'ユーザー検索'}}
                     </x-nav-link>
+                    
                 </div>
             </div>
 
