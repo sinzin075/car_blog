@@ -12,8 +12,12 @@
             <p class="mb-4 text-center text-lg">{{ $user->greeting }}</p>
         </div>
         <div class="flex justify-around mb-4 text-xl">
-            <span class="text-center">フォロー：{{ $followersCount }}</span>
-            <span class="text-center">フォロワー：{{ $followingsCount }}</span>
+            <a href="{{route('UserFollowed',['userId'=>$user->id])}}">
+                <span class="text-center">フォロー：{{ $followedsCount}}</span>
+            </a>
+            <a href="{{route('UserFollower',['userId'=>$user->id])}}">
+                <span class="text-center">フォロワー：{{ $followersCount}}</span>
+            </a>
         </div>
       <div>
         @if(Auth::check() && Auth::user()->id != $user->id)

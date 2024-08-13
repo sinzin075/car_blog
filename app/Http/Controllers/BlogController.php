@@ -266,7 +266,7 @@ class BlogController extends Controller
     {
         $user = User::findOrFail($userId);
         $followersCount = $user->followers()->count();
-        $followingsCount = $user->follows()->count();
+        $followedsCount = $user->follows()->count();
         $follow = Follow::where('followed_id', Auth::id())->where('follower_id', $userId)->first();
 
         $blogs = Blog::where('user_id', $userId)->with(['user', 'blogComments', 'likes'])->orderBy('created_at', 'desc')->get();
@@ -279,7 +279,7 @@ class BlogController extends Controller
         return view('blog.status')->with([
             'user' => $user,
             'followersCount' => $followersCount,
-            'followingsCount' => $followingsCount,
+            'followedsCount' => $followedsCount,
             'follow' => $follow,
             'blogs' => $blogs,
             'blog_comments' => $blog_comments,
@@ -389,6 +389,20 @@ class BlogController extends Controller
 
         return redirect()->back();
     }
+    
+    public function search()
+    {
+        return view('blog.search');
+    }
+    
+    public function UserSearch(Request $request)
+    {
+        $query = $request->input('query'); // テキストボックスに入力された値を取得
+        
+        $users = User::where('name', 'like', '%' . $query . '%')->get(); // 入力データであいまい検索
+        
+        return view('blog.UserSearch',['users'=>$users]);
+    }
 
     public function carList(Car $car)
     {
@@ -447,7 +461,6 @@ class BlogController extends Controller
         $user = Auth::id();
         $follower = $request->input('userId');
 
-        \Log::info('UserId: ' . $follower);
 
         $follow = Follow::where('followed_id', $user)->where('follower_id', $follower)->first();
 
@@ -455,11 +468,39 @@ class BlogController extends Controller
             $follow->delete();
         } else {
             Follow::create([
-                'followed_id' => $user,
-                'follower_id' => $follower,
+                'followed_id' => $follower,
+                'follower_id' => $user,
             ]);
         }
         return redirect()->back();
+    }
+    
+    public function UserFollower($userId)
+    {
+        $user = User::findOrFail($userId);
+    
+        // 自分をフォローしているユーザーを取得
+        $followers = Follow::where('followed_id', $user->id)->get();
+     
+        // followersをビューに渡す
+        return view('blog.UserFollower', [ 
+            'followers' => $followers,
+            'user'=>$user
+        ]);
+    }
+
+    public function UserFollowed($userId)
+    {
+        $user = User::findOrFail($userId);
+
+        //自分がフォローしているユーザーを取得
+        $followeds = Follow::where('follower_id', $user->id)->get();
+    
+        // followersをビューに渡す
+        return view('blog.UserFollowed', [
+            'followeds' =>$followeds,
+            'user'=>$user
+        ]);
     }
 
     public function destroy($id)

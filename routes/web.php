@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/{event}', [BlogController::class, 'EventShow'])->name('EventShow'); // 投稿詳細画面
     });
 
+    Route::get('/search',[BlogController::class,'search'])->name('search');
+    Route::get('/search/users',[BlogController::class,'UserSearch'])->name('UserSearch');
     Route::get('/status/{userId}', [BlogController::class, 'status'])->name('status');
     Route::get('/status/change/{userId}', [BlogController::class, 'statusChange'])->name('statusChange');
     Route::post('/status/change/upload/', [BlogController::class, 'statusChangeUpload'])->name('statusChangeUpload');
@@ -48,7 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/status/change/mycar/photo/save',[BlogController::class,'userCarPhoto'])->name('userCarPhoto');
     Route::get('/status/change/mycar/{userId}',[BlogController::class, 'carChoice'])->name('carChoice');
     Route::post('/status/chnge/myfollower/follow/{userId}',[BlogController::class,'follower'])->name('follower');  
-    
+    Route::get('/user/follower/{userId}',[BlogController::class,'UserFollower'])->name('UserFollower');
+    Route::get('/user/followed/{userId}',[BlogController::class,'UserFollowed'])->name('UserFollowed');
 });
 
 Route::get('/dashboard', function () {
