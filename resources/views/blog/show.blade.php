@@ -14,6 +14,10 @@
     @endif
 
     <div class="post p-4 mt-4 bg-car-light-gray rounded shadow space-y-4">
+        <p>
+            <a href="{{route('index')}}">戻る</a>
+            
+        </p>
         <div class="user-container relative mb-2 p-2 rounded" style="display: inline-block;">
             <a href="{{route('status',['userId'=>$blog->user->id])}}">
                 <div class="user-content flex items-center relative z-10" style="padding: 10px;">

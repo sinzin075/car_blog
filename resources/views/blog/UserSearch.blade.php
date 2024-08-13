@@ -1,5 +1,8 @@
 <x-app-layout>
+    
+    
     <div class="user-list-background">
+        <a href="{{route("search")}}" >戻る</a>
         <div class="user-list-container">
             @foreach($users as $user)
                 <a href="{{ route('status', [$user->id]) }}" class="user-link">
