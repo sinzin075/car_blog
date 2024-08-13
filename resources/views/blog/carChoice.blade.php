@@ -6,7 +6,7 @@
     </x-slot>
 
     <!-- 選択した車のデータを表示するエリア -->
-    <div id="selected-cars" class="post mx-auto mb-4 p-4 bg-car-dark-gray text-white rounded" style="width: 60%;">
+    <div id="selected-cars" class="post mb-4 p-4 bg-car-dark-gray text-white rounded" style="width: 24%; left: 0.5%; top: 80px; position: fixed;">
         <h2 class="text-2xl font-bold mb-4">Selected Cars</h2>
         <ul id="selected-cars-list" class="flex flex-wrap gap-4 justify-between">
             @for ($i = 0; $i < 3; $i++)
@@ -21,7 +21,7 @@
     </div>
 
     <!-- 車の一覧表示エリア -->
-    <div class="post mx-auto mb-4 p-4 bg-car-dark-gray text-white rounded" style="width: 60%;">
+    <div class="post mx-auto mb-4 p-4 bg-car-dark-gray text-white rounded" style="width: 60%; margin-left: 25%;">
         @foreach($cars as $countryName => $makers)
             <h2 class="text-xl font-bold mt-6 mb-2">{{ $countryName }}</h2>
             @foreach($makers->groupBy('maker.name') as $makerName => $carsByMaker)
@@ -41,7 +41,7 @@
     </div>
 
     <!-- 選択した車のデータを送信するためのフォーム -->
-    <form action="{{ route('carSave') }}" id="car-form" method="POST" class="mt-6 mx-auto mb-4 p-4 bg-car-dark-gray text-white rounded" style="width: 60%;">
+    <form action="{{ route('carSave') }}" id="car-form" method="POST" class="mt-6 mb-4 p-4 bg-car-dark-gray text-white rounded" style="width: 18%; left: 0.5%; top: 400px; position: fixed;">
         @csrf
         <input type="hidden" name="car1_id" id="form-car-1-id" value="">
         <input type="hidden" name="car2_id" id="form-car-2-id" value="">
@@ -137,26 +137,16 @@
                     }
                 });
             });
-
-            window.addEventListener('scroll', function() {
-                document.getElementById('selected-cars').style.top = `${window.scrollY}px`;
-            });
-
-            document.getElementById('car-form').addEventListener('submit', function() {
-                this.submit();
-            });
         });
     </script>
 
     <style>
         .bg-car-light-gray {
             background-color: #e0e0e0;
-            /* 薄いグレーに変更 */
         }
 
         .bg-car-dark-gray {
             background-color: #333333;
-            /* より濃いグレー */
         }
 
         .user-container {
@@ -165,7 +155,6 @@
             border-radius: 8px;
             overflow: hidden;
             background-color: #555555;
-            /* アイコンの背景色を落ち着いた色に */
         }
 
         .user-content {
@@ -181,43 +170,30 @@
             right: 0;
             bottom: 0;
             background-color: #555555;
-            /* アイコンの背景色 */
         }
 
         .user-name {
             color: #ffffff;
-            /* 白色で視認性を向上 */
             font-size: 1.2rem;
-            /* ユーザー名のフォントサイズを調整 */
             font-weight: 700;
-            /* 太文字にして視認性を向上 */
             line-height: 1.5;
-            /* 行間を調整して読みやすさを確保 */
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-            /* 影を付けて文字を際立たせる */
             z-index: 20;
             margin-left: 0.5rem;
         }
 
         .post {
             margin-bottom: 20px;
-            /* 投稿間のスペースを追加 */
             width: 60%;
-            /* 投稿コンテナの幅を60%に設定 */
             margin-left: auto;
-            /* 中央寄せのための左マージン */
             margin-right: auto;
-            /* 中央寄せのための右マージン */
         }
 
         .user-icon {
             width: 3rem;
-            /* アイコンのサイズを調整 */
             height: 3rem;
             border-radius: 50%;
-            /* 丸いアイコン */
             margin-right: 0.5rem;
-            /* アイコンとテキストの間隔 */
         }
 
         .user-profile-image {
@@ -225,9 +201,7 @@
             height: auto;
             display: block;
             object-fit: cover;
-            /* 縦長画像をカットする */
             clip-path: inset(15% 0 15% 0);
-            /* 上下15%をカット */
         }
 
         .common-image {
@@ -236,14 +210,12 @@
             display: block;
             margin: 0 auto;
             object-fit: cover;
-            /* 画像のアスペクト比を保ちながらサイズを調整 */
         }
 
         .btn-new-post {
             display: inline-block;
             padding: 10px 20px;
             background-color: #D7263D;
-            /* アクセントカラーの赤 */
             color: white;
             text-transform: uppercase;
             font-weight: bold;
@@ -255,16 +227,13 @@
 
         .btn-new-post:hover {
             background-color: #B51E32;
-            /* ホバー時に少し暗くする */
         }
 
         .btn-action {
             display: inline-block;
             padding: 10px 20px;
             background-color: #333333;
-            /* ダークグレー */
             color: #ffffff;
-            /* 白色 */
             border-radius: 5px;
             font-weight: bold;
             text-align: center;
@@ -277,16 +246,13 @@
 
         .btn-action:hover {
             background-color: #555555;
-            /* ホバー時の色変更 */
         }
 
         .count-display {
             display: inline-block;
             padding: 10px 20px;
             background-color: #333333;
-            /* ダークグレー */
             color: #ffffff;
-            /* 白色 */
             border-radius: 5px;
             font-weight: bold;
             text-align: center;
@@ -307,11 +273,9 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             width: 18%;
             margin: 5px 1%;
-            /* 車カードのデザイン */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            /* フレックスボックスで下に寄せる */
             align-items: center;
         }
 
@@ -320,41 +284,32 @@
             height: 150px;
             border-radius: 10px;
             object-fit: cover;
-            /* 車画像のデザイン */
         }
 
         .car-card p,
         .car-card span {
             color: #333333;
-            /* テキストの色を濃いグレーに */
             font-weight: bold;
             text-align: center;
             margin-top: 10px;
-            /* 上下の余白を追加 */
         }
 
         .no_comments {
             color: #999999;
-            /* 薄いグレーで未コメントを表示 */
             font-style: italic;
-            /* イタリックで強調 */
             text-align: center;
-            /* 中央揃え */
             margin-top: 10px;
         }
 
         .comment-divider {
             margin: 15px 0;
             border-top: 1px solid #cccccc;
-            /* コメント区切りの薄い線 */
         }
 
-        /* フォローボタンのスタイル */
         .follow-button {
             display: inline-block;
             padding: 8px 16px;
             background-color: #1DA1F2;
-            /* Twitterブルーに近い色 */
             color: #ffffff;
             font-weight: bold;
             border-radius: 5px;
@@ -368,17 +323,16 @@
 
         .follow-button:hover {
             background-color: #0d8de0;
-            /* ホバー時に少し暗くする */
         }
 
         .unfollow-button {
             display: inline-block;
-            padding: 8px 16px;
+            padding: 4px 8px; /* 小さめのパディング */
+            font-size: 0.8rem; /* ボタンの文字サイズを小さく */
             background-color: #ff4444;
-            /* 赤色で目立たせる */
             color: #ffffff;
             font-weight: bold;
-            border-radius: 5px;
+            border-radius: 3px; /* 角を少し丸める */
             text-align: center;
             text-transform: uppercase;
             transition: background-color 0.3s ease;
@@ -389,7 +343,24 @@
 
         .unfollow-button:hover {
             background-color: #cc3333;
-            /* ホバー時に少し暗くする */
+        }
+
+        /* 車の表示エリア全体のサイズを小さくする */
+        .selected-car {
+            padding: 8px; /* 内側のパディングを小さく */
+            font-size: 0.9rem; /* 全体のフォントサイズを少し小さく */
+            width: 80px; /* カードの幅を小さく */
+            height: 120px; /* カードの高さを小さく */
+        }
+
+        .selected-car .car-image {
+            width: 60px; /* 画像の幅を小さく */
+            height: 50px; /* 画像の高さを小さく */
+        }
+
+        .selected-car .car-name {
+            font-size: 0.8rem; /* 車名のフォントサイズを小さく */
+            margin-top: 5px; /* 車名と画像の間隔を狭く */
         }
     </style>
 </x-app-layout>
