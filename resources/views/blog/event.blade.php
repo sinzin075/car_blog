@@ -271,36 +271,40 @@
     <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}" async defer></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // ページロード時にスクロール位置を復元
-            const scrollPosition = localStorage.getItem('scrollPosition');
-            if (scrollPosition) {
-                window.scrollTo(0, parseInt(scrollPosition, 10));
-                localStorage.removeItem('scrollPosition');
-            }
+       document.addEventListener("DOMContentLoaded", function () {
+    // ページロード時にスクロール位置を復元
+    const scrollPosition = localStorage.getItem('scrollPosition');
+    if (scrollPosition) {
+        window.scrollTo(0, parseInt(scrollPosition, 10));
+        localStorage.removeItem('scrollPosition');
+    }
 
-            // ページ離脱時にスクロール位置を保存
-            window.addEventListener('beforeunload', function () {
-                localStorage.setItem('scrollPosition', window.scrollY);
+    // ページ離脱時にスクロール位置を保存
+    window.addEventListener('beforeunload', function () {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    });
+
+    // Google Mapsの初期化
+    if (typeof google !== 'undefined' && google.maps) {
+        var maps = document.querySelectorAll('.map-container');
+        maps.forEach(function (mapContainer) {
+            var lat = parseFloat(mapContainer.getAttribute('data-lat'));
+            var lng = parseFloat(mapContainer.getAttribute('data-lng'));
+            var location = { lat: lat, lng: lng };
+
+            var map = new google.maps.Map(mapContainer, {
+                zoom: 17,
+                center: location
             });
 
-            // Google Mapsの初期化
-            var maps = document.querySelectorAll('.map-container');
-            maps.forEach(function (mapContainer) {
-                var lat = parseFloat(mapContainer.getAttribute('data-lat'));
-                var lng = parseFloat(mapContainer.getAttribute('data-lng'));
-                var location = { lat: lat, lng: lng };
-
-                var map = new google.maps.Map(mapContainer, {
-                    zoom: 17,
-                    center: location
-                });
-
-                new google.maps.Marker({
-                    position: location,
-                    map: map
-                });
+            new google.maps.Marker({
+                position: location,
+                map: map
             });
         });
+    } else {
+        console.error('Google Maps API is not loaded');
+    }
+});
     </script>
 </x-app-layout>
