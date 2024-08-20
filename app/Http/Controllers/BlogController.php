@@ -337,7 +337,6 @@ class BlogController extends Controller
 
     public function carSave(Request $request)
     {
-        \Log::info('carSave request data', $request->all());
 
         $request->validate([
             'car1_id' => 'nullable|exists:cars,id',
@@ -351,26 +350,17 @@ class BlogController extends Controller
         $car2_id = $request->input('car2_id');
         $car3_id = $request->input('car3_id');
 
-        \Log::info('car1_id', ['car1_id' => $car1_id]);
-        \Log::info('car2_id', ['car2_id' => $car2_id]);
-        \Log::info('car3_id', ['car3_id' => $car3_id]);
-
         $user->car1_id = $car1_id;
         $user->car2_id = $car2_id;
         $user->car3_id = $car3_id;
 
-        \Log::info('User before save', ['user' => $user]);
-
         $user->save();
-
-        \Log::info('User saved', ['user' => $user]);
 
         return redirect()->route('profile.edit')->with('success', 'Your car selections have been saved.');
     }
 
     public function userCarPhoto(Request $request)
     {
-        Log::info('Request Data:', $request->all());
 
         $request->validate([
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',

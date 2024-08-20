@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="bg-car-dark-gray text-white p-4 fixed w-full z-10">
-            Car Blog
-        </div>
-    </x-slot>
-
     <div class="post p-4 mt-16 text-center">
         <a href="{{ route('event.EventPost') }}" class="btn-new-post">New Post</a>
     </div>
